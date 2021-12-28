@@ -1,7 +1,7 @@
 class BootStrap():
 
     def bootstraping(self):
-        """ This method is used to created a new content source in Workplace Search.
+        """ This method is used to create a new content source in Enterprise Search.
         """
         pass
 

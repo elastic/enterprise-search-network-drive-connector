@@ -1,9 +1,9 @@
 class Indexer:
-    """ This class is responsible for indexing the documents from Network Drive to the Workplace Search.
+    """ This class is responsible for indexing the documents from Network Drive to the Enterprise Search.
     """
 
     def indexing(self):
-        """ This method fetches all the files and ingest them into Workplace Search.
+        """ This method fetches all the files and ingest them into Enterprise Search.
         """
         pass
 
