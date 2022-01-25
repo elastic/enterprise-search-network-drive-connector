@@ -1,0 +1,54 @@
+#Configurations for the Network Drive Connector
+
+# ------------------------------- Network Drive configuration settings -------------------------------
+#The domain name of the Network Drive server for NTLM authenticaion
+network_drive.domain: ""
+#The username used to login to Network Drive server
+network_drive.username: ""
+#The password used to login to Network Drive server
+network_drive.password: ""
+#The relative path of the Network Drive.
+network_drive.path: ""
+# The name of the server hosting the Network Drive
+network_drive.server_name: ""
+# The IP address of the server hosting the Network Drive
+network_drive.server_ip: ""
+#The name of the machine where the connector will run
+client_machine.name: ""
+# ------------------------------- Workplace Search configuration settings -------------------------------
+#Access token for Workplace search authentication
+enterprise_search.access_token: "12345678"                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 
+#Source identifier for the custom source created on the workplace search server
+enterprise_search.source_id: "12345678"
+#Workplace search server address Example: http://es-host:3002 
+enterprise_search.host_url: "http://es-host:3002/"
+# ------------------------------- Connector specific configuration settings -------------------------------
+#Specifies the objects to be fetched and indexed in the WorkPlace search along with fields that needs to be included/excluded. The list of the objects with a pattern to be included/excluded is provided. By default all the objects are fetched
+include:
+   size:
+   path_template:
+exclude:
+  size:
+  path_template:
+#The timestamp after which all the objects that are modified or created are fetched from the Network Drive. By default, all the objects present in the Netowork Drive till the end_time are fetched
+start_time : "2021-12-09T15:14:28Z"
+#The timesstamp before which all the updated objects need to be fetched i.e. the connector won’t fetch any object updated/created after the end_time. By default, all the objects updated/added till the current time are fetched
+end_time : "2021-12-16T15:14:28Z"
+#The interval after which the connector looks for new/updated objects from Network Drive. The unit of the interval is minutes. By default, the interval is considered to be 60 minutes
+indexing_interval: 60
+#The interval after which the connector looks for the deleted objects from Network Drive. The unit of the interval is minutes. By default, the interval is considered to be 60 minutes
+deletion_interval: 60
+#The interval after which the connector fetches all the objects from the Network Drive from a given start_time in the configuration file to the current time
+full_sync_interval: 2880
+#The level of the logs the user wants to use in the log files. The possible values include: debug, info, warn, error. By default, the level is info
+log_level: info
+#The number of retries to perform in case of server error. The connector will use exponential backoff for retry mechanism
+retry_count: 3
+#Number of worker processes to be used for the connector. The ideal value should be equal to the number of CPU cores in the machine
+worker_process: 40
+#Denotes whether document permission will be enabled or not
+enable_document_permission: Yes
+#The path of csv file containing mapping of sharepoint user ID to Workplace user ID
+networkdrive_enterprisesearch.user_mapping: ""
+#The interval after which the connector looks for new/updated user permissions from the users mapping file. The unit of the interval is minutes. By default, the interval is considered to be 60 minutes
+sync_permission_interval: 60
