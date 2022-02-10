@@ -114,14 +114,14 @@ schema = {
         'required': False,
         'type': 'datetime',
         'max': datetime.datetime.utcnow(),
-        'default': (datetime.datetime.utcnow() - datetime.timedelta(days=180)).strftime('%Y-%m-%dT%H:%M:%SZ'),
+        'default': (datetime.datetime.utcnow() - datetime.timedelta(days=180)).strftime(DATETIME_FORMAT),
         'coerce': coerce_rfc_3339_date
     },
     'end_time': {
         'required': False,
         'type': 'datetime',
         'max': datetime.datetime.utcnow(),
-        'default': (datetime.datetime.utcnow()).strftime('%Y-%m-%dT%H:%M:%SZ'),
+        'default': (datetime.datetime.utcnow()).strftime(DATETIME_FORMAT),
         'coerce': coerce_rfc_3339_date
     },
     'log_level': {
