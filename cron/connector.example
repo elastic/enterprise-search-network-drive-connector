@@ -1,4 +1,4 @@
-0 */2 * * * ees_networkdrive incremental-sync >> ~/incremental-sync.log
-0 0 */2 * * ees_networkdrive full-sync >> ~/full-sync.log
-0 * * * * ees_networkdrive deletion-sync >> ~/deletion-sync.log
-*/5 * * * * ees_networkdrive permission-sync >> ~/permission-sync.log
+0 */2 * * * ees_network_drive incremental-sync >> ~/incremental-sync.log
+0 0 */2 * * ees_network_drive full-sync >> ~/full-sync.log
+0 * * * * ees_network_drive deletion-sync >> ~/deletion-sync.log
+*/5 * * * * ees_network_drive permission-sync >> ~/permission-sync.log

@@ -147,7 +147,7 @@ schema = {
         'type': 'boolean',
         'default': True
     },
-    'networkdrive_enterprisesearch.user_mapping': {
+    'network_drive_enterprise_search.user_mapping': {
         'required': False,
         'type': 'string',
     }

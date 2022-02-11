@@ -39,7 +39,7 @@ def _parser():
 
     This method will initialize argument parser with a list
     of avaliable commands and their options."""
-    parser = ArgumentParser(prog="ees_networkdrive")
+    parser = ArgumentParser(prog="ees_network_drive")
     parser.add_argument(
         "-c",
         '--config-file',

@@ -43,4 +43,4 @@ worker_process: 40
 #Denotes whether document permission will be enabled or not
 enable_document_permission: Yes
 #The path of csv file containing mapping of Network Drive user ID to Workplace user ID
-networkdrive_enterprisesearch.user_mapping: ""
+network_drive_enterprise_search.user_mapping: ""

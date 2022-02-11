@@ -11,7 +11,7 @@ from setuptools import find_packages, setup
 if sys.version_info < (3, 8):
     raise ValueError("Requires Python 3.8 or superior")
 
-from ees_networkdrive import __version__  # NOQA
+from ees_network_drive import __version__  # NOQA
 
 install_requires = [
     "requests_ntlm",
@@ -43,7 +43,7 @@ classifiers = [
 
 
 setup(
-    name="ees-networkdrive",
+    name="ees-network_drive",
     version=__version__,
     url="someurl",
     packages=find_packages(),
@@ -58,6 +58,6 @@ setup(
     data_files=[("config", ["network_drive_connector.yml"])],
     entry_points="""
       [console_scripts]
-      ees_networkdrive = ees_networkdrive.cli:main
+      ees_network_drive = ees_network_drive.cli:main
       """,
 )

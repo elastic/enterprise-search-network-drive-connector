@@ -7,7 +7,7 @@
 PYTHON = python3
 PIP = pip3
 VENV_DIRECTORY = venv
-PROJECT_DIRECTORY = ees_networkdrive
+PROJECT_DIRECTORY = ees_network_drive
 
 .DEFAULT_GOAL = help
 

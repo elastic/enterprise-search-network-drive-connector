@@ -6,6 +6,7 @@
 """This module contains uncategorisied utility methods.
 """
 import hashlib
+import time
 import urllib.parse
 
 from tika import parser
@@ -41,3 +42,26 @@ def hash_id(file_name, file_path):
         :Returns: hashed file id
     """
     return hashlib.sha256(file_name + '-' + file_path).hexdigest()
+
+
+def retry(exception_list):
+    """ Decorator for retrying in case of network exceptions.
+        Retries the wrapped method `times` times if the exceptions listed
+        in ``exceptions`` are thrown
+        :param exception_list: Lists of exceptions on which the connector should retry
+    """
+    def decorator(func):
+        def execute(self, *args, **kwargs):
+            retry = 1
+            while retry <= self.retry_count:
+                try:
+                    return func(self, *args, **kwargs)
+                except exception_list as exception:
+                    self.logger.exception(
+                        'Error while connecting to the network drive. Retry count: %s out of %s. \
+                            Error: %s' % (retry, self.retry_count, exception)
+                    )
+                    time.sleep(2 ** retry)
+                    retry += 1
+        return execute
+    return decorator
