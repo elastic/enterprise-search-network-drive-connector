@@ -7,7 +7,7 @@
 PYTHON = python3
 PIP = pip3
 VENV_DIRECTORY = venv
-PROJECT_DIRECTORY = ees_sharepoint
+PROJECT_DIRECTORY = ees_network_drive
 TEST_DIRECTORY = tests
 COVERAGE_THRESHOLD = 0 # In percents, so 50 = 50%
 
