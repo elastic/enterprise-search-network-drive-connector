@@ -10,7 +10,7 @@
     prune-dead-branches: true
     scm:
       - github:
-          repo:
+          repo: enterprise-search-network-drives-connector
           repo-owner: elastic
           disable-pr-notifications: true
           branch-discovery: all
