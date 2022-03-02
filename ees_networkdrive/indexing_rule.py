@@ -22,15 +22,16 @@ class IndexingRules:
             :returns: True or False denoting whether the file size is according to the pattern
         """
         file_size = file_details['file_size']
+        int_value = int(pattern)
         operation = {
-            '>': file_size > int(pattern),
-            '>=': file_size >= int(pattern),
-            '<': file_size < int(pattern),
-            '<=': file_size <= int(pattern),
-            '!': file_size != int(pattern),
-            '!=': file_size != int(pattern),
-            '=': file_size == int(pattern),
-            '==': file_size == int(pattern),
+            '>': file_size > int_value,
+            '>=': file_size >= int_value,
+            '<': file_size < int_value,
+            '<=': file_size <= int_value,
+            '!': file_size != int_value,
+            '!=': file_size != int_value,
+            '=': file_size == int_value,
+            '==': file_size == int_value,
         }
         return operation.get(symbol)
 
@@ -38,7 +39,7 @@ class IndexingRules:
         """This method is used to check if the current file is following the indexing rule or not
             :param file_details: dictionary containing file properties
             :param include: include pattern provided for matching
-            :param exclude: exlcude pattern for matching
+            :param exclude: exclude pattern for matching
             :returns: True or False denoting if the file is to following the indexing rule or not
         """
         inc, exc = True, True
@@ -48,17 +49,17 @@ class IndexingRules:
             exc = self.include_exclude(exclude, include, file_details, 'exclude')
         return inc and exc
 
-    def include_exclude(self, pattern_dict, duplicate, file_details, pattern_type):
+    def include_exclude(self, pattern_dict, is_present_in_include, file_details, pattern_type):
         """Helper function used to redirect the filtering based on filtertype(size/path)
-           and pattern type(include/exlcude)
+           and pattern type(include/exclude)
            :param pattern_dict: Dictionary containing key value pairs as filter type and list of patterns
-           :param duplicate: Used to check if any pattern is already present in include type
+           :param is_present_in_include: Used to check if any pattern is already present in include type
            :param file_details: dictionary containing file properties
            :param pattern_type: include/exclude
         """
         for filtertype, pattern in pattern_dict.items():
             for value in (pattern or []):
-                if duplicate and (value in (duplicate.get(filtertype) or [])):
+                if is_present_in_include and (value in (is_present_in_include.get(filtertype) or [])):
                     pattern.remove(value)
             result = self.filter_pattern(filtertype, pattern, file_details, pattern_type)
             if result is True:
@@ -68,7 +69,7 @@ class IndexingRules:
         return False
 
     def filter_pattern(self, filtertype, pattern, file_details, pattern_type):
-        """This method is used to connect with network drive.
+        """This method is used to connect with Network Drives.
             :filtertype: denotes the type of filter used: size/path_template
             :param pattern: include/ exclude pattern provided for matching
             :param file_details: dictionary containing file properties
@@ -77,7 +78,7 @@ class IndexingRules:
         if pattern:
             for value in pattern:
                 if filtertype == 'size':
-                    initial = re.match('[>,<,=,!]=?', value)
+                    initial = re.match('[><=!]=?', value)
                     result = self.filter_size(file_details, initial[0], re.findall("[0-9]+", value)[0])
                 else:
                     result = glob.globmatch(file_details['file_path'], value, flags=glob.GLOBSTAR)

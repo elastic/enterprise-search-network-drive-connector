@@ -10,10 +10,12 @@ import copy
 import json
 import multiprocessing
 import os
-from datetime import datetime
+from pathlib import Path
 
-from .checkpointing import Checkpoint
-from .constant import DATETIME_FORMAT, DOCUMENT_SIZE, IDS_PATH
+from .utils import multithreading, split_in_chunks
+
+
+from .constant import BATCH_SIZE, IDS_PATH
 from .files import Files
 
 
@@ -21,186 +23,152 @@ class Indexer:
     """This class contains common logic for indexing to workplace search
     """
 
-    def __init__(self, start_time, end_time, checkpoint, workplace_search_client, network_drive_client, config, logger):
+    def __init__(self, logger, config, time_range, workplace_search_client, network_drive_client):
         self.logger = logger
         self.config = config
-        self.is_error = False
-        self.start_time = start_time
-        self.end_time = end_time
-        self.checkpoint = checkpoint
+        self.time_range = time_range
         self.workplace_search_client = workplace_search_client
         self.network_drive_client = network_drive_client
+        self.total_documents_indexed = 0
 
-    def index_document(self, document):
+    @multithreading
+    def index_documents(self, documents):
         """ This method indexes the documents to the workplace.
-            :param document: list of documents to be indexed
+            :param documents: list of documents to be indexed
         """
         try:
-            if document:
-                total_documents_indexed = 0
-                document_list = [document[i * DOCUMENT_SIZE:(i + 1) * DOCUMENT_SIZE] for i in range((len(document) + DOCUMENT_SIZE - 1) // DOCUMENT_SIZE)]
-                for chunk in document_list:
+            if documents:
+                for chunk in split_in_chunks(documents, BATCH_SIZE):
                     response = self.workplace_search_client.index_documents(
                         content_source_id=self.config.get_value("enterprise_search.source_id"),
                         documents=chunk
                     )
                     for each in response['results']:
                         if not each['errors']:
-                            total_documents_indexed += 1
+                            self.total_documents_indexed += 1
                         else:
-                            self.logger.error("Unable to index the document with id: %s Error %s" % (each['id'], each['errors']))
-                self.logger.info("Successfully indexed %s to the workplace out of %s" % (
-                    total_documents_indexed, len(response['results'])))
+                            self.logger.error(f"Unable to index the document with id: {each['id']} Error {each['errors']}")
         except Exception as exception:
-            self.logger.exception("Error while indexing the files. Error: %s"
-                                  % (exception)
+            self.logger.exception(f"Error while indexing the files. Error: {exception}"
                                   )
-            self.is_error = True
+            raise exception
 
-    def indexing(self, drive, ids, storage, is_error_shared):
-        """This method fetches all the objects from Network Drive server and
+    def threaded_index_documents(self, documents):
+        index_threads = []
+        for document_list in self.partition_equal_share(documents, self.config.get_value("max_threads")):
+            indexing_thread = self.index_documents(document_list)
+            index_threads.append(indexing_thread)
+
+        for thread in index_threads:
+            thread.join()
+        self.logger.info(f"Successfully indexed {self.total_documents_indexed} to the workplace out of {len(documents)}")
+
+    def partition_equal_share(self, list_path, total_groups):
+        """divides the list in groups of approximately equal sizes
+            :param list_path: list of folder paths
+            :param total_groups: number of groups to be formed
+        """
+        if list_path:
+            groups = min(total_groups, len(list_path))
+            group_list = []
+            for i in range(groups):
+                group_list.append(list_path[i::groups])
+            return group_list
+        else:
+            return []
+
+    def indexing(self, drive, ids, drive_path, indexing_rules):
+        """This method fetches all the objects from Network Drives server and
             ingests them into the workplace search
             :param drive: drive name
-            :param ids: id drive of the all the objects
-            :param storage: temporary storage for storing all the documents
-            :param is_error_shared: list of all the is_error values
+            :param ids: temporary storage containing ids and path of the files from doc_id.json
+            :param drive_path: path to network drives
+            :param indexing_rules: object of indexing rules
         """
-        time_range = {'start_time': self.start_time, 'end_time': self.end_time}
         connection = self.network_drive_client.connect()
         if connection:
-            files = Files(self.logger, self.config)
-            document = files.fetch_files(connection, time_range)
-            for doc in document:
-                ids["files"].update({doc["id"]: doc['path']})
-            self.index_document(document)
-            self.logger.info(
-                "Completed fetching all the objects for drive: %s"
-                % (drive)
-            )
+            files = Files(self.logger, self.config, self.network_drive_client, indexing_rules)
+            documents = multiprocessing.Manager().list()
+            store = files.recursive_fetch(conn=connection, service_name=drive_path.parts[0], path=os.path.join(*drive_path.parts[1:]), store=[])
             connection.close()
+            partition_paths = self.partition_equal_share(store, self.config.get_value("max_threads"))
+            if partition_paths:
+                threads = []
+                for path_list in partition_paths:
+                    try:
+                        thread = files.fetch_files(drive_path.parts[0], path_list, self.time_range, documents)
+                        threads.append(thread)
+                    except IOError as error:
+                        self.logger.exception(f"Error while threading. Error: {error}")
+                for thread in threads:
+                    thread.join()
+                for doc in documents:
+                    ids["files"].update({doc["id"]: doc['path']})
+                self.threaded_index_documents(documents)
+                self.logger.info(
+                    f"Completed fetching all the objects for drive: {drive}"
+                )
+            else:
+                self.logger.info("No files found in the network drives path")
+            storage = {"files": {}}
             prev_ids = storage["files"]
             prev_ids.update(ids["files"])
             storage["files"] = prev_ids
+            return storage
         else:
-            self.is_error = True
-        is_error_shared.append(self.is_error)
+            self.logger.exception("Connection not established")
+            raise ConnectionError
 
 
-def datetime_partitioning(start_time, end_time, processes):
-    """ Divides the timerange in equal partitions by number of processors
-        :param start_time: start time of the interval
-        :param end_time: end time of the interval
-        :param processes: number of processors the device have
-    """
-    start_time = datetime.strptime(start_time, DATETIME_FORMAT)
-    end_time = datetime.strptime(end_time, DATETIME_FORMAT)
-
-    diff = (end_time - start_time) / processes
-    for idx in range(processes):
-        yield (start_time + diff * idx)
-    yield end_time
-
-
-def init_multiprocessing(start_time, end_time, drive, ids, storage, is_error_shared, checkpoint, workplace_search_client, network_drive_client, config, logger):
-    """This method initializes the IndexUpdate class and kicks-off the multiprocessing. This is a wrapper method added to fix the pickling issue while using multiprocessing in Windows
-            :param start_time: start time of the indexing
-            :param end_time: end time of the indexing
-            :param drive: drive name
-            :param ids: id drive of the all the objects
-            :param storage: temporary storage for storing all the documents
-            :param is_error_shared: list of all the is_error values
-            :param checkpoint: checkpoint details
-            :param workplace_search_client: cached workplace_search client object
-            :param network_drive_client: cached connection object to network drive
-            :param config: configuration object
-            :param logger: logger object
-        """
-    indexer = Indexer(start_time, end_time, checkpoint, workplace_search_client, network_drive_client, config, logger)
-    indexer.indexing(drive, ids, storage, is_error_shared)
-
-
-def start(indexing_type, config, logger, workplace_search_client, network_drive_client):
+def start(time_range, config, logger, workplace_search_client, network_drive_client, indexing_rules):
     """Runs the indexing logic
-        :param indexing_type: The type of the indexing i.e. Incremental Sync or Full sync
+        :param time_range: the duration considered for fetching files from network drives
         :param config: configuration object
         :param logger: cached logger object
         :param workplace_search_client: cached workplace_search client object
-        :param network_drive_client: cached connection object to network drive
+        :param network_drive_client: cached connection object to Network Drives
+        :param indexing_rules: object of indexing rules
     """
     logger.info("Starting the indexing..")
-    is_error_shared = multiprocessing.Manager().list()
-    current_time = (datetime.utcnow()).strftime(DATETIME_FORMAT)
     ids_collection = {"global_keys": {}}
     storage_with_collection = {"global_keys": {}, "delete_keys": {}}
 
     if (os.path.exists(IDS_PATH) and os.path.getsize(IDS_PATH) > 0):
-        with open(IDS_PATH) as ids_store:
+        with open(IDS_PATH, encoding='utf-8') as ids_store:
             try:
                 ids_collection = json.load(ids_store)
             except ValueError as exception:
                 logger.exception(
-                    "Error while parsing the json file of the ids store from path: %s. Error: %s"
-                    % (IDS_PATH, exception)
+                    f"Error while parsing the json file of the ids store from path: {IDS_PATH}. Error: {exception}"
                 )
 
     storage_with_collection["delete_keys"] = copy.deepcopy(ids_collection.get("global_keys"))
 
     drive = config.get_value("network_drive.server_name")
-    storage = multiprocessing.Manager().dict({"files": {}})
     logger.info(
-        "Starting the data fetching for drive: %s"
-        % (drive)
+        f"Starting the data fetching for drive: {drive}"
     )
-    check = Checkpoint(config, logger)
 
-    worker_process = config.get_value("worker_process")
-    if indexing_type == "incremental":
-        start_time, end_time = check.get_checkpoint(
-            current_time, drive)
-    else:
-        start_time = config.get_value("start_time")
-        end_time = current_time
+    drive_path = config.get_value("network_drive.path")
+    drive_path = Path(drive_path)
 
-    # partitioning the drive timeframe in equal parts by worker processes
-    partitions = list(datetime_partitioning(
-        start_time, end_time, worker_process))
-
-    datelist = []
-    for sub in partitions:
-        datelist.append(sub.strftime(DATETIME_FORMAT))
-
-    jobs = []
-    if not ids_collection["global_keys"].get(drive):
-        ids_collection["global_keys"][drive] = {
-            "files": {}}
-
-    for num in range(0, worker_process):
-        start_time_partition = datelist[num]
-        end_time_partition = datelist[num + 1]
+    try:
+        if not ids_collection["global_keys"].get(drive):
+            ids_collection["global_keys"][drive] = {
+                "files": {}}
+        indexer = Indexer(logger, config, time_range, workplace_search_client, network_drive_client)
+        storage_with_collection["global_keys"][drive] = indexer.indexing(drive, ids_collection["global_keys"][drive], drive_path, indexing_rules)
         logger.info(
-            "Successfully fetched the checkpoint details: start_time: %s and end_time: %s, calling the indexing"
-            % (start_time_partition, end_time_partition)
+            f"Saving the checkpoint for the drive: {drive}"
         )
 
-        process = multiprocessing.Process(target=init_multiprocessing, args=(start_time_partition, end_time_partition, drive, ids_collection["global_keys"][drive], storage, is_error_shared, check, workplace_search_client, network_drive_client, config, logger))
-        jobs.append(process)
+    except Exception as exception:
+        logger.info("Error while indexing. Checkpoint not saved")
+        raise exception
 
-    for job in jobs:
-        job.start()
-    for job in jobs:
-        job.join()
-    storage_with_collection["global_keys"][drive] = storage.copy()
-    logger.info(
-        "Saving the checkpoint for the drive: %s" % (drive)
-    )
-    if True in is_error_shared:
-        check.set_checkpoint(start_time, indexing_type, drive)
-    else:
-        check.set_checkpoint(end_time, indexing_type, drive)
-
-    with open(IDS_PATH, "w") as ids_file:
+    with open(IDS_PATH, "w", encoding='utf-8') as ids_file:
         try:
             json.dump(storage_with_collection, ids_file, indent=4)
         except ValueError as exception:
             logger.warning(
-                'Error while adding ids to json file. Error: %s' % (exception))
+                f'Error while adding ids to json file. Error: {exception}')
