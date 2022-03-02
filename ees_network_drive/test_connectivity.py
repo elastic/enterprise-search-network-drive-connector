@@ -32,7 +32,8 @@ def fixture_settings():
 
 @pytest.mark.drives
 def test_network_drive(settings):
-    """ Tests the connection to the Network Drives server by calling a basic get request to fetch files and logs proper messages
+    """ Tests the connection to the Network Drives server by calling a basic get request \
+        to fetch files and logs proper messages
     """
     configs, logger = settings
     print("Starting Network Drives connectivity tests..")
@@ -72,7 +73,8 @@ def test_workplace(settings):
                 break
         except Exception as exception:
             print(
-                f"[Fail] Error while connecting to the workplace host {enterprise_search_host}. Retry Count: {retry}. Error: {exception}"
+                f"[Fail] Error while connecting to the workplace host {enterprise_search_host}. \
+                Retry Count: {retry}. Error: {exception}"
             )
             # This condition is to avoid sleeping for the last time
             if retry < retry_count:
@@ -107,7 +109,8 @@ def test_ingestion(settings):
     while retry <= retry_count:
         try:
             response = workplace_search.index_documents(
-                http_auth=configs.get_value("enterprise_search.api_key"), content_source_id=configs.get_value("enterprise_search.source_id"),
+                http_auth=configs.get_value("enterprise_search.api_key"),
+                content_source_id=configs.get_value("enterprise_search.source_id"),
                 documents=document,
             )
             print(
@@ -115,7 +118,8 @@ def test_ingestion(settings):
             break
         except Exception as exception:
             print(
-                f"[Fail] Error while ingesting document to the workplace host {enterprise_search_host}. Retry Count: {retry}. Error: {exception}"
+                f"[Fail] Error while ingesting document to the workplace host \
+                {enterprise_search_host}. Retry Count: {retry}. Error: {exception}"
             )
             # This condition is to avoid sleeping for the last time
             if retry < retry_count:
@@ -148,7 +152,8 @@ def test_ingestion(settings):
                     break
             except Exception as exception:
                 print(
-                    f"[Fail] Error while deleting document id 1234 from the workplace host {enterprise_search_host}. Retry Count: {retry}. Error: {exception}"
+                    f"[Fail] Error while deleting document id 1234 from the workplace host \
+                    {enterprise_search_host}. Retry Count: {retry}. Error: {exception}"
                 )
                 # This condition is to avoid sleeping for the last time
                 if retry < retry_count:

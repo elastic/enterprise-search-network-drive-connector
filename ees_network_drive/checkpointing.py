@@ -30,7 +30,8 @@ class IncorrectFormatError(Exception):
 
     def __init__(self, obj_type, checkpoint, inner_exception):
         super().__init__(f"Start time: {checkpoint} for {obj_type} in the checkpoint file {CHECKPOINT_PATH} is not in the correct format.\
-        Expected format: {DATETIME_FORMAT}. Remove the checkpoint entry for the {obj_type} or fix the format to continue indexing")
+        Expected format: {DATETIME_FORMAT}. Remove the checkpoint entry for the {obj_type} or \
+        fix the format to continue indexing")
         self.checkpoint = checkpoint
         self.inner_exception = inner_exception
 
@@ -61,7 +62,8 @@ class Checkpoint:
 
         if os.path.exists(CHECKPOINT_PATH) and os.path.getsize(CHECKPOINT_PATH) > 0:
             self.logger.debug(
-                "Checkpoint file exists and has contents, hence considering the checkpoint time instead of start_time and end_time"
+                "Checkpoint file exists and has contents, hence considering the checkpoint time \
+                instead of start_time and end_time"
             )
             with open(CHECKPOINT_PATH, encoding="UTF-8") as checkpoint_store:
                 try:
@@ -69,7 +71,9 @@ class Checkpoint:
 
                     if not checkpoint_list.get(obj_type):
                         self.logger.debug(
-                            f"The checkpoint file is present but it does not contain the start_time for {obj_type}, hence considering the start_time and end_time from the configuration file instead of the last successful fetch time"
+                            f"The checkpoint file is present but it does not contain the start_time for {obj_type}, \
+                            hence considering the start_time and end_time from the configuration file instead of the \
+                            last successful fetch time"
                         )
                     else:
                         try:
@@ -79,7 +83,8 @@ class Checkpoint:
                             raise IncorrectFormatError(obj_type, checkpoint_list.get(obj_type), exception)
                 except ValueError as exception:
                     self.logger.exception(
-                        f"Error while parsing the json file of the checkpoint store from path: {CHECKPOINT_PATH}. Error: {exception}"
+                        f"Error while parsing the json file of the checkpoint store from path: {CHECKPOINT_PATH}. \
+                            Error: {exception}"
                     )
                     self.logger.info(
                         "Considering the start_time and end_time from the configuration file"
@@ -87,7 +92,8 @@ class Checkpoint:
 
         else:
             self.logger.debug(
-                f"Checkpoint file does not exist at {CHECKPOINT_PATH}, considering the start_time and end_time from the configuration file"
+                f"Checkpoint file does not exist at {CHECKPOINT_PATH}, considering \
+                the start_time and end_time from the configuration file"
             )
 
         self.logger.debug(
@@ -107,12 +113,14 @@ class Checkpoint:
                 checkpoint_list = json.load(checkpoint_store)
                 if checkpoint_list.get(obj_type):
                     self.logger.debug(
-                        f"Setting the checkpoint contents: {current_time} for the {obj_type} to the checkpoint path: {CHECKPOINT_PATH}"
+                        f"Setting the checkpoint contents: {current_time} for the {obj_type} \
+                        to the checkpoint path: {CHECKPOINT_PATH}"
                     )
                     checkpoint_list[obj_type] = current_time
                 else:
                     self.logger.debug(
-                        f"Setting the checkpoint contents: {self.config.get_value('end_time')} for the {obj_type} to the checkpoint path: {CHECKPOINT_PATH}"
+                        f"Setting the checkpoint contents: {self.config.get_value('end_time')} for the {obj_type} \
+                        to the checkpoint path: {CHECKPOINT_PATH}"
                     )
                     checkpoint_list[obj_type] = self.config.get_value('end_time')
         except Exception as exception:
@@ -122,14 +130,16 @@ class Checkpoint:
                 )
             else:
                 self.logger.exception(
-                    f"Error while fetching the json file of the checkpoint store from path: {CHECKPOINT_PATH}. Error: {exception}"
+                    f"Error while fetching the json file of the checkpoint store from path: {CHECKPOINT_PATH}. \
+                    Error: {exception}"
                 )
             if index_type == "incremental":
                 checkpoint_time = self.config.get_value('end_time')
             else:
                 checkpoint_time = current_time
             self.logger.debug(
-                f"Setting the checkpoint contents: {checkpoint_time} for the {obj_type} to the checkpoint path: {CHECKPOINT_PATH}"
+                f"Setting the checkpoint contents: {checkpoint_time} for the {obj_type} \
+                to the checkpoint path: {CHECKPOINT_PATH}"
             )
             checkpoint_list = {obj_type: checkpoint_time}
 
@@ -139,5 +149,6 @@ class Checkpoint:
                 self.logger.info("Successfully saved the checkpoint")
             except ValueError as exception:
                 self.logger.exception(
-                    f"Error while updating the existing checkpoint json file. Adding the new content directly instead of updating. Error: {exception}"
+                    f"Error while updating the existing checkpoint json file. \
+                    Adding the new content directly instead of updating. Error: {exception}"
                 )

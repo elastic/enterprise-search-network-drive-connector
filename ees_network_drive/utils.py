@@ -89,7 +89,8 @@ def fetch_users_from_csv_file(user_mapping, logger):
 
 
 def multithreading(func):
-    """ Decorator that multithreads the target function with the given parameters. Returns the thread created for the function
+    """ Decorator that multithreads the target function with the given parameters.
+        Returns the thread created for the function
         :param func: Function to be multithreaded
     """
     def wrapper(*args):
