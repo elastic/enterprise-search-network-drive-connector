@@ -3,17 +3,20 @@
 # or more contributor license agreements. Licensed under the Elastic License 2.0;
 # you may not use this file except in compliance with the Elastic License 2.0.
 #
-"""network_drive_client allows to call Network Drive and returns a connection object
-    that can be used to fetch files from Network Drive.
+"""network_drive_client allows to call Network Drives and returns a connection object
+    that can be used to fetch files from Network Drives.
 """
 from smb.base import NotConnectedError, SMBTimeout
 from smb.SMBConnection import SMBConnection
 from .utils import retry
-from .constant import IS_DIRECT_TCP, SERVER_PORT, USE_NTLM_V2
+
+USE_NTLM_V2 = True
+IS_DIRECT_TCP = True
+SERVER_PORT = 445
 
 
 class NetworkDrive:
-    """Creates an SMB connection object to the Network Drive and returns the object
+    """Creates an SMB connection object to the Network Drives and returns the object
     """
     def __init__(self, config, logger):
         self.logger = logger
@@ -27,7 +30,7 @@ class NetworkDrive:
 
     @retry(exception_list=(NotConnectedError, SMBTimeout))
     def connect(self):
-        """This method is used to connect with network drive.
+        """This method is used to connect with Network Drives.
         """
         conn = SMBConnection(self.username, self.password, self.client_machine_name, self.server_name, self.domain,
                              use_ntlm_v2=USE_NTLM_V2, is_direct_tcp=IS_DIRECT_TCP)
@@ -39,6 +42,5 @@ class NetworkDrive:
             raise exception
         except Exception as exception:
             self.logger.exception(
-                "Unkown Error while connecting to network drive. Error: %s"
-                % (exception)
+                f"Unknown Error while connecting to Network Drives. Error: {exception}"
             )

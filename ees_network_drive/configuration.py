@@ -6,7 +6,7 @@
 """Configuration module allows manipulations with application configuration.
 
     This module can be used to read and validate configuration file that defines
-    the settings of the Network Drive Server connector.
+    the settings of the Network Drives Server connector.
 """
 import yaml
 from cerberus import Validator
@@ -52,7 +52,7 @@ class Configuration:
         self.__configurations = {}
         self.file_name = file_name
         try:
-            with open(file_name) as stream:
+            with open(file_name, encoding='utf-8') as stream:
                 self.__configurations = yaml.safe_load(stream)
         except YAMLError as exception:
             raise ConfigurationParsingException(file_name, exception)

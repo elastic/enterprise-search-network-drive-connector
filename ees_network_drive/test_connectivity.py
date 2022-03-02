@@ -5,7 +5,7 @@
 #
 """test_connectivity module allows to test that connector setup is correct.
 
-It's possible to check connectivity to Network Drive Server instance,
+It's possible to check connectivity to Network Drives Server instance,
 to Elastic Enterprise Search instance and check if ingestion of
 documents works."""
 
@@ -32,19 +32,18 @@ def fixture_settings():
 
 @pytest.mark.drives
 def test_network_drive(settings):
-    """ Tests the connection to the network drive server by calling a basic get request to fetch files and logs proper messages
+    """ Tests the connection to the Network Drives server by calling a basic get request to fetch files and logs proper messages
     """
     configs, logger = settings
-    print("Starting Network Drive connectivity tests..")
+    print("Starting Network Drives connectivity tests..")
     network_drive_client = NetworkDrive(configs, logger)
     conn = network_drive_client.connect()
     if not conn:
-        assert False, "Error while connecting to Network Drive at %s:445" % (
-            configs.get("network_drive.server_ip"))
+        assert False, f"Error while connecting to Network Drives at {configs.get_value('network_drive.server_ip')}"
     else:
         assert True
     conn.close()
-    print("Network Drive connectivity tests completed..")
+    print("Network Drives connectivity tests completed..")
 
 
 @pytest.mark.workplace
@@ -79,8 +78,7 @@ def test_workplace(settings):
             if retry < retry_count:
                 time.sleep(2 ** retry)
             else:
-                assert False, "Error while connecting to the Enterprise Search at %s" % (
-                    enterprise_search_host)
+                assert False, f"Error while connecting to the Enterprise Search at {enterprise_search_host}"
             retry += 1
 
     print("Workplace connectivity tests completed..")
@@ -123,8 +121,7 @@ def test_ingestion(settings):
             if retry < retry_count:
                 time.sleep(2 ** retry)
             else:
-                assert False, "Error while connecting to the Enterprise Search at %s" % (
-                    enterprise_search_host)
+                assert False, f"Error while connecting to the Enterprise Search at {enterprise_search_host}"
             retry += 1
 
     if response:
@@ -157,8 +154,7 @@ def test_ingestion(settings):
                 if retry < retry_count:
                     time.sleep(2 ** retry)
                 else:
-                    assert False, "Error while connecting to the Enterprise Search at %s" % (
-                        enterprise_search_host)
+                    assert False, "Error while connecting to the Enterprise Search at {enterprise_search_host}"
                 retry += 1
 
     print("Workplace ingestion tests completed..")

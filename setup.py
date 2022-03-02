@@ -8,8 +8,8 @@ import sys
 
 from setuptools import find_packages, setup
 
-if sys.version_info < (3, 8):
-    raise ValueError("Requires Python 3.8 or superior")
+if sys.version_info < (3, 6):
+    raise ValueError("Requires Python 3.6 or superior")
 
 from ees_network_drive import __version__  # NOQA
 
@@ -24,12 +24,13 @@ install_requires = [
     "pysmb",
     "wcmatch",
     "pytest-cov",
-    "cached_property"
+    "cached_property",
+    "flake8"
 ]
 
 description = ""
 
-with open("README.rst") as readme_file:
+with open("README.rst", encoding='utf-8') as readme_file:
     description += readme_file.read() + "\n\n"
 
 
@@ -37,6 +38,8 @@ classifiers = [
     "Programming Language :: Python",
     "Development Status :: 5 - Production/Stable",
     "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.6",
+    "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
 ]

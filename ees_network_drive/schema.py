@@ -84,7 +84,7 @@ schema = {
                 'type': 'list',
                 'schema': {
                     'type': 'string',
-                    'regex': '[>,<,=,!]=?([0-9]*)$',
+                    'regex': '[><=!]=?([0-9]*)$',
                 }
             },
         }
@@ -136,7 +136,7 @@ schema = {
         'default': 3,
         'min': 1
     },
-    'worker_process': {
+    'max_threads': {
         'required': False,
         'type': 'integer',
         'default': 40,

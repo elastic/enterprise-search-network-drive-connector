@@ -4,6 +4,6 @@
 # you may not use this file except in compliance with the Elastic License 2.0.
 #
 """This module provides the tooling to synchronize data
-    from Network Drive to Elastic Enterprise Search.
+    from Network Drives to Elastic Enterprise Search.
 """
 __version__ = "0.1.0"

@@ -5,8 +5,8 @@
 #
 """Cli module contains entry point for the package.
 
-Endpoint provides a meaningful piece of functionallity
-related to uploading data from Network drive
+Endpoint provides a meaningful piece of functionality
+related to uploading data from Network Drives
 to Elastic Enterprise Search with subcommands."""
 
 import os
@@ -48,7 +48,8 @@ def _parser():
         help="path to the configuration file"
     )
 
-    subparsers = parser.add_subparsers(dest="cmd", required=True)
+    subparsers = parser.add_subparsers(dest="cmd")
+    subparsers.required = True
     bootstrap = subparsers.add_parser(CMD_BOOTSTRAP)
     bootstrap.add_argument(
         '-n',

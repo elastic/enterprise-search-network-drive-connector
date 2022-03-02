@@ -9,14 +9,16 @@
     such as set a checkpoint and get a checkpoint.
 
     Checkpoints help with incremental or interrupted synchronizations,
-    remembering the last moment of time when sync successfully finshed,
+    remembering the last moment of time when sync successfully finished,
     so that later next sync can continue from that place.
 """
 import json
 import os
 
-from .constant import CHECKPOINT_PATH, DATETIME_FORMAT
+from .constant import DATETIME_FORMAT
 from .schema import coerce_rfc_3339_date
+
+CHECKPOINT_PATH = os.path.join(os.path.dirname(__file__), 'checkpoint.json')
 
 
 class IncorrectFormatError(Exception):
@@ -51,15 +53,14 @@ class Checkpoint:
            :param obj_type: drive for which checkpoint is fetched
         """
         self.logger.info(
-            "Fetching the checkpoint details from the checkpoint file: %s"
-            % CHECKPOINT_PATH
+            f"Fetching the checkpoint details from the checkpoint file: {CHECKPOINT_PATH}"
         )
 
         start_time = self.config.get_value("start_time")
         end_time = self.config.get_value("end_time")
 
         if os.path.exists(CHECKPOINT_PATH) and os.path.getsize(CHECKPOINT_PATH) > 0:
-            self.logger.info(
+            self.logger.debug(
                 "Checkpoint file exists and has contents, hence considering the checkpoint time instead of start_time and end_time"
             )
             with open(CHECKPOINT_PATH, encoding="UTF-8") as checkpoint_store:

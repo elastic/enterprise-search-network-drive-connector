@@ -4,12 +4,23 @@
 # you may not use this file except in compliance with the Elastic License 2.0.
 #
 
-PYTHON = python3
+PYTHON ?= python3
+PYTHON_EXE = python
 PIP = pip3
 VENV_DIRECTORY = venv
 PROJECT_DIRECTORY = ees_network_drive
+TEST_DIRECTORY = tests
+COVERAGE_THRESHOLD = 0 # In percents, so 50 = 50%
+EXEC_DIR = bin
+CMD_UPDATE = touch
 
 .DEFAULT_GOAL = help
+
+ifeq ($(OS),Windows_NT)
+    detected_OS := Windows
+    EXEC_DIR := Scripts
+	CMD_UPDATE := type nul >
+endif
 
 help:
 	@echo "make install_locally - install the project into virtual environment for development purposes"
@@ -19,37 +30,41 @@ help:
 	@echo "make cover - check test coverage for the project"
 	@echo "make lint - run linter against the project"
 	@echo "make clean - remove venv and other temporary files from the project"
-	@echo "make test_connectivity - test connectivity to Network Drive and Enterprise Search"
+	@echo "make test_connectivity - test connectivity to Network Drives and Enterprise Search"
+	@echo "make update_package - update package with local changes"
 
 .venv_init:
 	${PIP} install virtualenv
 	${PYTHON} -m venv ${VENV_DIRECTORY}
-	touch .venv_init
+	${CMD_UPDATE} .venv_init
 
 .installed: .venv_init
-	${VENV_DIRECTORY}/bin/${PIP} install -U pip
-	${VENV_DIRECTORY}/bin/${PIP} install -r requirements.txt
-	touch .installed
+	${VENV_DIRECTORY}/${EXEC_DIR}/${PIP} install -U pip
+	${VENV_DIRECTORY}/${EXEC_DIR}/${PIP} install -r requirements.txt
+	${CMD_UPDATE} .installed
 
-# install_locally an be used to test the implementation after the changes were made to the module
+# install_locally can be used to test the implementation after the changes were made to the module
 # #{VENV_DIRECTORY}/bin will contain a file with name ${PROJECT_DIRECTORY} that is the main
 # executable.
 install_locally: .installed .venv_init
-	${VENV_DIRECTORY}/bin/${PIP} install .
+	${VENV_DIRECTORY}/${EXEC_DIR}/${PIP} install .
 
 test: .installed .venv_init
-	${VENV_DIRECTORY}/bin/${PYTHON} -m pytest
+	${VENV_DIRECTORY}/${EXEC_DIR}/${PYTHON_EXE} -m pytest ${TEST_DIRECTORY}/ --suppress-no-test-exit-code
 
 cover: .installed .venv_init
-	${VENV_DIRECTORY}/bin/pytest --cov ${PROJECT_DIRECTORY} --cov-fail-under=80 tests
+	${VENV_DIRECTORY}/${EXEC_DIR}/${PYTHON_EXE} -m pytest --cov ${PROJECT_DIRECTORY} --cov-fail-under=${COVERAGE_THRESHOLD} ${TEST_DIRECTORY}/ --suppress-no-test-exit-code
 
 lint: .installed .venv_init
-	${VENV_DIRECTORY}/bin/flake8 ${PROJECT_DIRECTORY}
+	${VENV_DIRECTORY}/${EXEC_DIR}/flake8 ${PROJECT_DIRECTORY}
 
 test_connectivity: .installed .venv_init
-	${VENV_DIRECTORY}/bin/pytest ${PROJECT_DIRECTORY}/test_connectivity.py
+	${VENV_DIRECTORY}/${EXEC_DIR}/pytest ${PROJECT_DIRECTORY}/test_connectivity.py
 
 install_package: .installed
+	${PIP} install --user .
+
+update_package: 
 	${PIP} install --user .
 
 uninstall_package:
@@ -57,6 +72,15 @@ uninstall_package:
 
 
 clean:
+ifeq ($(detected_OS),Windows)
+	if exist venv rd /s /Q venv 2>nul
+	if exist build rd /s /Q build 2>nul
+	if exist ${PROJECT_DIRECTORY}.egg-info rd /s /Q ${PROJECT_DIRECTORY}.egg-info 2>nul
+	if exist .pytest_cache rd /s /Q .pytest_cache 2>nul
+	if exist .coverage del /s /Q .coverage 2>nul
+	if exist .installed del /Q .installed 2>nul
+	if exist .venv_init del /Q .venv_init 2>nul
+else
 	rm -rf venv
 	rm -rf build
 	rm -rf *.egg-info
@@ -64,3 +88,4 @@ clean:
 	rm -f .coverage
 	rm -f .installed
 	rm -f .venv_init
+endif

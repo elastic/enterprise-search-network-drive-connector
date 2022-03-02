@@ -10,11 +10,15 @@ etc. This module provides convenience interface defining the shared
 objects and methods that will can be used by commands."""
 import logging
 
-from functools import cached_property
+try:
+    from functools import cached_property
+except ImportError:
+    from cached_property import cached_property
 from elastic_enterprise_search import WorkplaceSearch
 
 from .configuration import Configuration
 from .network_drive_client import NetworkDrive
+from .indexing_rule import IndexingRules
 
 
 class BaseCommand:
@@ -77,5 +81,12 @@ class BaseCommand:
 
     @cached_property
     def network_drive_client(self):
-        """Get the Network Drive client instance for the running command."""
+        """Get the Network Drives client instance for the running command."""
         return NetworkDrive(self.config, self.logger)
+
+    @cached_property
+    def indexing_rules(self):
+        """Get the object for indexing rules to check should the file be indexed or not
+            based on the patterns defined in configuration file.
+        """
+        return IndexingRules()
