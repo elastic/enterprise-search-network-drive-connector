@@ -3,6 +3,9 @@
 # or more contributor license agreements. Licensed under the Elastic License 2.0;
 # you may not use this file except in compliance with the Elastic License 2.0.
 #
-"""This module provides the tooling to synchronize
-data from network drives to Enterprise Search."""
-__version__ = "0.1.0"
+import unittest
+import unittest.mock
+
+class TestSample(unittest.TestCase):
+    def test_equality_of_one_to_itself(self):
+      assert 1 == 1

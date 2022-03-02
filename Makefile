@@ -30,8 +30,7 @@ help:
 	@echo "make cover - check test coverage for the project"
 	@echo "make lint - run linter against the project"
 	@echo "make clean - remove venv and other temporary files from the project"
-	@echo "make test_connectivity - test connectivity to Network Drives and Enterprise Search"
-	@echo "make update_package - update package with local changes"
+	@echo "make test_connectivity - test connectivity to Sharepoint and Enterprise Search"
 
 .venv_init:
 	${PIP} install virtualenv
