@@ -123,7 +123,8 @@ class PermissionSyncCommand(BaseCommand):
                         else:
                             mappings[enterprise_search_user] = [network_drive_sid]
                 except csv.Error as e:
-                    self.logger.exception(f"Error while reading user mapping file at the location: {self.user_mapping}. Error: {e}")
+                    self.logger.exception(f"Error while reading user mapping file \
+                    at the location: {self.user_mapping}. Error: {e}")
             for key, val in mappings.items():
                 self.workplace_add_permission(key, val)
         else:
