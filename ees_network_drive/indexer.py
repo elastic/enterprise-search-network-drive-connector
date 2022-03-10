@@ -62,7 +62,7 @@ class Indexer:
         thread_pool.close()
         thread_pool.join()
 
-        self.logger.info(f"Successfully indexed {self.total_documents_indexed} to the workplace out of {len(documents)}")
+        self.logger.info(f"Successfully indexed {self.total_documents_indexed} to workplace out of {len(documents)}")
 
     def partition_equal_share(self, list_path, total_groups):
         """divides the list in groups of approximately equal sizes
