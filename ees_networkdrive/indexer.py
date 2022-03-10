@@ -7,15 +7,13 @@
     It's possible to run full syncs and incremental syncs with this module.
 """
 import copy
-import json
-import multiprocessing
 import os
 from pathlib import Path
 
-from .utils import multithreading, split_in_chunks
+from .utils import split_in_chunks
+from multiprocessing.pool import ThreadPool
 
-
-from .constant import BATCH_SIZE, IDS_PATH
+from .constant import BATCH_SIZE
 from .files import Files
 
 
@@ -30,8 +28,8 @@ class Indexer:
         self.workplace_search_client = workplace_search_client
         self.network_drive_client = network_drive_client
         self.total_documents_indexed = 0
+        self.max_threads = config.get_value("max_threads")
 
-    @multithreading
     def index_documents(self, documents):
         """ This method indexes the documents to the workplace.
             :param documents: list of documents to be indexed
@@ -47,20 +45,23 @@ class Indexer:
                         if not each['errors']:
                             self.total_documents_indexed += 1
                         else:
-                            self.logger.error(f"Unable to index the document with id: {each['id']} Error {each['errors']}")
+                            self.logger.error(
+                                f"Unable to index the document with id: {each['id']} Error {each['errors']}")
         except Exception as exception:
             self.logger.exception(f"Error while indexing the files. Error: {exception}"
                                   )
             raise exception
 
     def threaded_index_documents(self, documents):
-        index_threads = []
+        """This method multi threads the indexing of documents into Enterprise Search
+            :param documents: documents to index to Enterprise Search
+        """
+        thread_pool = ThreadPool(self.max_threads)
         for document_list in self.partition_equal_share(documents, self.config.get_value("max_threads")):
-            indexing_thread = self.index_documents(document_list)
-            index_threads.append(indexing_thread)
+            thread_pool.apply_async(self.index_documents, (document_list, ))
+        thread_pool.close()
+        thread_pool.join()
 
-        for thread in index_threads:
-            thread.join()
         self.logger.info(f"Successfully indexed {self.total_documents_indexed} to the workplace out of {len(documents)}")
 
     def partition_equal_share(self, list_path, total_groups):
@@ -87,24 +88,27 @@ class Indexer:
         """
         connection = self.network_drive_client.connect()
         if connection:
-            files = Files(self.logger, self.config, self.network_drive_client, indexing_rules)
-            documents = multiprocessing.Manager().list()
-            store = files.recursive_fetch(conn=connection, service_name=drive_path.parts[0], path=os.path.join(*drive_path.parts[1:]), store=[])
+            files = Files(self.logger, self.config, self.network_drive_client)
+            store = files.recursive_fetch(conn=connection, service_name=drive_path.parts[0],
+                                          path=os.path.join(*drive_path.parts[1:]), store=[])
             connection.close()
-            partition_paths = self.partition_equal_share(store, self.config.get_value("max_threads"))
+            partition_paths = self.partition_equal_share(store, self.max_threads)
             if partition_paths:
-                threads = []
+                documents = []
+                documents_to_index = []
+                thread_pool = ThreadPool(self.max_threads)
                 for path_list in partition_paths:
-                    try:
-                        thread = files.fetch_files(drive_path.parts[0], path_list, self.time_range, documents)
-                        threads.append(thread)
-                    except IOError as error:
-                        self.logger.exception(f"Error while threading. Error: {error}")
-                for thread in threads:
-                    thread.join()
-                for doc in documents:
+                    thread = thread_pool.apply_async(files.fetch_files, (drive_path.parts[0],
+                                                                         path_list, self.time_range, indexing_rules))
+                    documents.append(thread)
+                for result in [r.get() for r in documents]:
+                    if result:
+                        documents_to_index.extend(result)
+                thread_pool.close()
+                thread_pool.join()
+                for doc in documents_to_index:
                     ids["files"].update({doc["id"]: doc['path']})
-                self.threaded_index_documents(documents)
+                self.threaded_index_documents(documents_to_index)
                 self.logger.info(
                     f"Completed fetching all the objects for drive: {drive}"
                 )
@@ -120,7 +124,7 @@ class Indexer:
             raise ConnectionError
 
 
-def start(time_range, config, logger, workplace_search_client, network_drive_client, indexing_rules):
+def start(time_range, config, logger, workplace_search_client, network_drive_client, indexing_rules, storage_obj):
     """Runs the indexing logic
         :param time_range: the duration considered for fetching files from network drives
         :param config: configuration object
@@ -128,19 +132,16 @@ def start(time_range, config, logger, workplace_search_client, network_drive_cli
         :param workplace_search_client: cached workplace_search client object
         :param network_drive_client: cached connection object to Network Drives
         :param indexing_rules: object of indexing rules
+        :storage_obj: object for LocalStorage class used to fetch/update ids stored locally
     """
     logger.info("Starting the indexing..")
     ids_collection = {"global_keys": {}}
     storage_with_collection = {"global_keys": {}, "delete_keys": {}}
 
-    if (os.path.exists(IDS_PATH) and os.path.getsize(IDS_PATH) > 0):
-        with open(IDS_PATH, encoding='utf-8') as ids_store:
-            try:
-                ids_collection = json.load(ids_store)
-            except ValueError as exception:
-                logger.exception(
-                    f"Error while parsing the json file of the ids store from path: {IDS_PATH}. Error: {exception}"
-                )
+    try:
+        ids_collection = storage_obj.load_storage()
+    except FileNotFoundError:
+        logger.debug("Local storage for ids was not found.")
 
     storage_with_collection["delete_keys"] = copy.deepcopy(ids_collection.get("global_keys"))
 
@@ -157,7 +158,8 @@ def start(time_range, config, logger, workplace_search_client, network_drive_cli
             ids_collection["global_keys"][drive] = {
                 "files": {}}
         indexer = Indexer(logger, config, time_range, workplace_search_client, network_drive_client)
-        storage_with_collection["global_keys"][drive] = indexer.indexing(drive, ids_collection["global_keys"][drive], drive_path, indexing_rules)
+        storage_with_collection["global_keys"][drive] = indexer.indexing(
+            drive, ids_collection["global_keys"][drive], drive_path, indexing_rules)
         logger.info(
             f"Saving the checkpoint for the drive: {drive}"
         )
@@ -166,9 +168,4 @@ def start(time_range, config, logger, workplace_search_client, network_drive_cli
         logger.info("Error while indexing. Checkpoint not saved")
         raise exception
 
-    with open(IDS_PATH, "w", encoding='utf-8') as ids_file:
-        try:
-            json.dump(storage_with_collection, ids_file, indent=4)
-        except ValueError as exception:
-            logger.warning(
-                f'Error while adding ids to json file. Error: {exception}')
+    storage_obj.update_storage(storage_with_collection)

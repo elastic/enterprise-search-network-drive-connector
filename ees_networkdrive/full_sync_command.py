@@ -25,11 +25,12 @@ class FullSyncCommand(BaseCommand):
         workplace_search_client = self.workplace_search_client
         network_drive_client = self.network_drive_client
         indexing_rules = self.indexing_rules
+        storage_obj = self.local_storage
         current_time = (datetime.utcnow()).strftime(DATETIME_FORMAT)
         checkpoint = Checkpoint(config, logger)
         drive = config.get_value("network_drive.server_name")
 
         time_range = {"start_time": config.get_value("start_time"), "end_time": current_time}
 
-        start(time_range, config, logger, workplace_search_client, network_drive_client, indexing_rules)
+        start(time_range, config, logger, workplace_search_client, network_drive_client, indexing_rules, storage_obj)
         checkpoint.set_checkpoint(current_time, INDEXING_TYPE, drive)

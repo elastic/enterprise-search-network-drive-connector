@@ -57,16 +57,17 @@ class IndexingRules:
            :param file_details: dictionary containing file properties
            :param pattern_type: include/exclude
         """
+        should_index = True
         for filtertype, pattern in pattern_dict.items():
             for value in (pattern or []):
                 if is_present_in_include and (value in (is_present_in_include.get(filtertype) or [])):
                     pattern.remove(value)
             result = self.filter_pattern(filtertype, pattern, file_details, pattern_type)
-            if result is True:
+            if result is False:
+                should_index = False
+            elif result is True:
                 return True
-        if result is None:
-            return True
-        return False
+        return should_index
 
     def filter_pattern(self, filtertype, pattern, file_details, pattern_type):
         """This method is used to connect with Network Drives.

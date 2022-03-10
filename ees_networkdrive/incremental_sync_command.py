@@ -28,6 +28,7 @@ class IncrementalSyncCommand(BaseCommand):
         workplace_search_client = self.workplace_search_client
         network_drive_client = self.network_drive_client
         indexing_rules = self.indexing_rules
+        storage_obj = self.local_storage
         current_time = (datetime.utcnow()).strftime(DATETIME_FORMAT)
         checkpoint = Checkpoint(config, logger)
         drive = config.get_value("network_drive.server_name")
@@ -35,5 +36,5 @@ class IncrementalSyncCommand(BaseCommand):
         start_time, end_time = checkpoint.get_checkpoint(current_time, drive)
         time_range = {"start_time": start_time, "end_time": end_time}
 
-        start(time_range, config, logger, workplace_search_client, network_drive_client, indexing_rules)
+        start(time_range, config, logger, workplace_search_client, network_drive_client, indexing_rules, storage_obj)
         checkpoint.set_checkpoint(end_time, INDEXING_TYPE, drive)
