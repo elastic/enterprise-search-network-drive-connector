@@ -10,7 +10,6 @@ import time
 import csv
 import os
 import urllib.parse
-import threading
 
 from tika import parser
 
@@ -88,18 +87,6 @@ def fetch_users_from_csv_file(user_mapping, logger):
     return rows
 
 
-def multithreading(func):
-    """ Decorator that multithreads the target function with the given parameters.
-        Returns the thread created for the function
-        :param func: Function to be multithreaded
-    """
-    def wrapper(*args):
-        thread = threading.Thread(target=func, args=args)
-        thread.start()
-        return thread
-    return wrapper
-
-
 def split_in_chunks(input_list, chunk_size):
     """This method splits a list into separate chunks with maximum size
         as chunk_size
@@ -112,3 +99,20 @@ def split_in_chunks(input_list, chunk_size):
     for i in range(0, len(input_list), chunk_size):
         list_of_chunks.append(input_list[i:i + chunk_size])
     return list_of_chunks
+
+
+def group_files_by_folder_path(file_details):
+    """Prepare dictionary which is used for deleting all files under one folder
+        :param file_details: dictionary containing file id and file path
+        Returns:
+            file_structure: dictionary containing folder and list of files inside the folder
+    """
+    file_structure = {}
+    if file_details:
+        for file_id, file_path in file_details.items():
+            file_path, file_name = os.path.split(file_path)
+            if file_structure.get(file_path):
+                file_structure[file_path][file_name] = file_id
+            else:
+                file_structure[file_path] = {file_name: file_id}
+    return file_structure

@@ -17,6 +17,7 @@ except ImportError:
 from elastic_enterprise_search import WorkplaceSearch
 
 from .configuration import Configuration
+from .local_storage import LocalStorage
 from .network_drive_client import NetworkDrive
 from .indexing_rule import IndexingRules
 
@@ -90,3 +91,9 @@ class BaseCommand:
             based on the patterns defined in configuration file.
         """
         return IndexingRules()
+
+    @cached_property
+    def local_storage(self):
+        """Get the object for local storage to fetch and update ids stored locally
+        """
+        return LocalStorage(self.logger)

@@ -5,8 +5,6 @@
 #
 """This module contains all the constants used throughout the code.
 """
-import os
 
 DATETIME_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
-IDS_PATH = os.path.join(os.path.dirname(__file__), 'doc_id.json')
 BATCH_SIZE = 100
