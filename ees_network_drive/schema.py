@@ -105,7 +105,7 @@ schema = {
                 'type': 'list',
                 'schema': {
                     'type': 'string',
-                    'regex': '[>,<,=,!]=?([0-9]*)$'
+                    'regex': '[><=!]=?([0-9]*)$'
                 }
             }
         }
@@ -114,7 +114,7 @@ schema = {
         'required': False,
         'type': 'datetime',
         'max': datetime.datetime.utcnow(),
-        'default': (datetime.datetime.utcnow() - datetime.timedelta(days=180)).strftime(DATETIME_FORMAT),
+        'default': '1970-01-01T00:00:00Z',
         'coerce': coerce_rfc_3339_date
     },
     'end_time': {
