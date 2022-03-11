@@ -11,7 +11,10 @@ import csv
 import os
 import urllib.parse
 
+from datetime import datetime
 from tika import parser
+
+from .constant import DATETIME_FORMAT
 
 
 def extract(content):
@@ -116,3 +119,9 @@ def group_files_by_folder_path(file_details):
             else:
                 file_structure[file_path] = {file_name: file_id}
     return file_structure
+
+
+def get_current_time():
+    """Returns current time in rfc 339 format
+    """
+    return (datetime.utcnow()).strftime(DATETIME_FORMAT)
