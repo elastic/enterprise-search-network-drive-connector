@@ -11,12 +11,11 @@
     Recency is determined by the time when the last successful incremental or full job
     was ran.
 """
-from datetime import datetime
 
 from .base_command import BaseCommand
 from .indexer import start
 from .checkpointing import Checkpoint
-from .constant import DATETIME_FORMAT
+from .utils import get_current_time
 
 INDEXING_TYPE = "incremental"
 
@@ -29,12 +28,13 @@ class IncrementalSyncCommand(BaseCommand):
         network_drive_client = self.network_drive_client
         indexing_rules = self.indexing_rules
         storage_obj = self.local_storage
-        current_time = (datetime.utcnow()).strftime(DATETIME_FORMAT)
+        current_time = get_current_time()
         checkpoint = Checkpoint(config, logger)
         drive = config.get_value("network_drive.server_name")
 
         start_time, end_time = checkpoint.get_checkpoint(current_time, drive)
         time_range = {"start_time": start_time, "end_time": end_time}
-
+        logger.info(f"Indexing started at: {current_time}")
         start(time_range, config, logger, workplace_search_client, network_drive_client, indexing_rules, storage_obj)
         checkpoint.set_checkpoint(end_time, INDEXING_TYPE, drive)
+        logger.info(f"Indexing ended at: {get_current_time()}")

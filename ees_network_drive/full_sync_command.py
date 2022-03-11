@@ -8,12 +8,11 @@
     It will attempt to sync absolutely all documents that are available in the
     third-party system and ingest them into Enterprise Search instance.
 """
-from datetime import datetime
 
 from .base_command import BaseCommand
 from .indexer import start
 from .checkpointing import Checkpoint
-from .constant import DATETIME_FORMAT
+from .utils import get_current_time
 
 INDEXING_TYPE = "full"
 
@@ -26,11 +25,12 @@ class FullSyncCommand(BaseCommand):
         network_drive_client = self.network_drive_client
         indexing_rules = self.indexing_rules
         storage_obj = self.local_storage
-        current_time = (datetime.utcnow()).strftime(DATETIME_FORMAT)
+        current_time = get_current_time()
         checkpoint = Checkpoint(config, logger)
         drive = config.get_value("network_drive.server_name")
 
         time_range = {"start_time": config.get_value("start_time"), "end_time": current_time}
-
+        logger.info(f"Indexing started at: {current_time}")
         start(time_range, config, logger, workplace_search_client, network_drive_client, indexing_rules, storage_obj)
         checkpoint.set_checkpoint(current_time, INDEXING_TYPE, drive)
+        logger.info(f"Indexing ended at: {get_current_time()}")
