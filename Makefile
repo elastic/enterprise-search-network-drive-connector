@@ -10,7 +10,7 @@ PIP = pip3
 VENV_DIRECTORY = venv
 PROJECT_DIRECTORY = ees_network_drive
 TEST_DIRECTORY = tests
-COVERAGE_THRESHOLD = 0 # In percents, so 50 = 50%
+COVERAGE_THRESHOLD = 50 # In percents, so 50 = 50%
 EXEC_DIR = bin
 CMD_UPDATE = touch
 

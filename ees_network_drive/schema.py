@@ -7,13 +7,13 @@
 """
 import datetime
 
-from .constant import DATETIME_FORMAT
+from .constant import RFC_3339_DATETIME_FORMAT
 
 
 def coerce_rfc_3339_date(input_date):
     """This function returns true if its argument is a valid RFC 3339 date."""
     if input_date:
-        return datetime.datetime.strptime(input_date, DATETIME_FORMAT)
+        return datetime.datetime.strptime(input_date, RFC_3339_DATETIME_FORMAT)
     return False
 
 
@@ -121,7 +121,7 @@ schema = {
         'required': False,
         'type': 'datetime',
         'max': datetime.datetime.utcnow(),
-        'default': (datetime.datetime.utcnow()).strftime(DATETIME_FORMAT),
+        'default': (datetime.datetime.utcnow()).strftime(RFC_3339_DATETIME_FORMAT),
         'coerce': coerce_rfc_3339_date
     },
     'log_level': {

@@ -12,7 +12,7 @@ import yaml
 from cerberus import Validator
 from yaml.error import YAMLError
 
-from .constant import DATETIME_FORMAT
+from .constant import RFC_3339_DATETIME_FORMAT
 from .schema import schema
 
 
@@ -81,4 +81,4 @@ class Configuration:
 
     @staticmethod
     def __parse_date_config_value(string):
-        return string.strftime(DATETIME_FORMAT)
+        return string.strftime(RFC_3339_DATETIME_FORMAT)

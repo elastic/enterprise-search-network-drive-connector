@@ -14,7 +14,7 @@ import urllib.parse
 from datetime import datetime
 from tika import parser
 
-from .constant import DATETIME_FORMAT
+from .constant import RFC_3339_DATETIME_FORMAT
 
 
 def extract(content):
@@ -63,7 +63,7 @@ def retry(exception_list):
                     return func(self, *args, **kwargs)
                 except exception_list as exception:
                     self.logger.exception(
-                        f'Error while connecting to the Network Drives. Retry count: {retry} out of {self.retry_count}. \
+                        f'Error while creating a connection. Retry count: {retry} out of {self.retry_count}. \
                             Error: {exception}'
                     )
                     time.sleep(2 ** retry)
@@ -105,7 +105,7 @@ def split_in_chunks(input_list, chunk_size):
 
 
 def group_files_by_folder_path(file_details):
-    """Prepare dictionary which is used for deleting all files under one folder
+    """This method returns a dictionary of folder paths and list of files inside the folder
         :param file_details: dictionary containing file id and file path
         Returns:
             file_structure: dictionary containing folder and list of files inside the folder
@@ -122,6 +122,6 @@ def group_files_by_folder_path(file_details):
 
 
 def get_current_time():
-    """Returns current time in rfc 339 format
+    """Returns current time in rfc 3339 format
     """
-    return (datetime.utcnow()).strftime(DATETIME_FORMAT)
+    return (datetime.utcnow()).strftime(RFC_3339_DATETIME_FORMAT)

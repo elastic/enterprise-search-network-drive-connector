@@ -15,7 +15,7 @@
 import json
 import os
 
-from .constant import DATETIME_FORMAT
+from .constant import RFC_3339_DATETIME_FORMAT
 from .schema import coerce_rfc_3339_date
 
 CHECKPOINT_PATH = os.path.join(os.path.dirname(__file__), 'checkpoint.json')
@@ -30,7 +30,7 @@ class IncorrectFormatError(Exception):
 
     def __init__(self, obj_type, checkpoint, inner_exception):
         super().__init__(f"Start time: {checkpoint} for {obj_type} in the checkpoint file {CHECKPOINT_PATH} is not in the correct format.\
-        Expected format: {DATETIME_FORMAT}. Remove the checkpoint entry for the {obj_type} or \
+        Expected format: {RFC_3339_DATETIME_FORMAT}. Remove the checkpoint entry for the {obj_type} or \
         fix the format to continue indexing")
         self.checkpoint = checkpoint
         self.inner_exception = inner_exception
@@ -77,7 +77,8 @@ class Checkpoint:
                         )
                     else:
                         try:
-                            start_time = coerce_rfc_3339_date(checkpoint_list.get(obj_type)).strftime(DATETIME_FORMAT)
+                            start_time = \
+                                coerce_rfc_3339_date(checkpoint_list.get(obj_type)).strftime(RFC_3339_DATETIME_FORMAT)
                             end_time = current_time
                         except ValueError as exception:
                             raise IncorrectFormatError(obj_type, checkpoint_list.get(obj_type), exception)
