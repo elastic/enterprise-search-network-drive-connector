@@ -52,7 +52,7 @@ class DeletionSyncCommand(BaseCommand):
                     if folder_path in visited_folders:
                         continue
                     files = Files(self.logger, self.config, self.network_drive_client)
-                    folder_deleted = files.check_file_in_network_drive(
+                    folder_deleted = files.is_file_present_on_network_drive(
                         connection, drive_name, folder_path, file_structure,
                         ids_list, visited_folders, deleted_folders
                     )
