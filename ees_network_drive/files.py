@@ -6,6 +6,7 @@
 """Module responsible for fetching the files from the Network Drives and returning a document with
     all file details in json format.
 """
+import errno
 import os
 import tempfile
 import time
@@ -35,8 +36,6 @@ class Files:
         self.user_mapping = config.get_value("network_drive_enterprise_search.user_mapping")
         self.drive_path = config.get_value("network_drive.path")
         self.server_ip = config.get_value("network_drive.server_ip")
-        self.include = config.get_value("include")
-        self.exclude = config.get_value("exclude")
         self.enable_document_permission = config.get_value("enable_document_permission")
         self.network_drives_client = client
 
@@ -78,14 +77,16 @@ class Files:
         for each_file in file_list:
             if not each_file.isDirectory:
                 file_name = each_file.filename
-                updated_at = time.strftime(constant.DATETIME_FORMAT, time.gmtime(each_file.last_attr_change_time))
-                created_at = time.strftime(constant.DATETIME_FORMAT, time.gmtime(each_file.create_time))
+                updated_at = \
+                    time.strftime(constant.RFC_3339_DATETIME_FORMAT, time.gmtime(each_file.last_attr_change_time))
+                created_at = \
+                    time.strftime(constant.RFC_3339_DATETIME_FORMAT, time.gmtime(each_file.create_time))
                 file_path = os.path.join(path, file_name)
                 file_details = {'updated_at': updated_at, 'file_type': os.path.splitext(file_name)[1],
                                 'file_size': each_file.file_size,
                                 'created_at': created_at, 'file_name': file_name, 'file_path': file_path,
                                 'web_path': f"file://{self.server_ip}/{service_name}/{file_path}"}
-                is_indexable = indexing_rules.apply_rules(file_details, self.include, self.exclude)
+                is_indexable = indexing_rules.apply_rules(file_details)
                 if is_indexable and parse(time_range.get('start_time')) < parse(updated_at) and \
                         parse(updated_at) <= parse(time_range.get('end_time')):
                     file_id = each_file.file_id if each_file.file_id else hash_id(file_name, path)
@@ -136,7 +137,6 @@ class Files:
                 storage = self.extract_files(connection, service_name, folder_path, time_range, indexing_rules)
                 for file_id, file_details in storage.items():
                     doc = {}
-                    file_obj = tempfile.NamedTemporaryFile()
                     for field, file_field in schema.items():
                         doc[field] = file_details.get(file_field)
                     doc.update({'body': {}, 'id': str(file_id)})
@@ -146,17 +146,7 @@ class Files:
                                                                             file_details.get("file_path"))
                         doc['_allow_permissions'] = allow_user_permission
                         doc['_deny_permissions'] = deny_user_permission
-                    try:
-                        connection.retrieveFile(service_name, file_details.get('file_path'), file_obj)
-                        file_obj.seek(0)
-                        try:
-                            doc['body'] = extract(file_obj.read())
-                        except TikaException as exception:
-                            self.logger.exception(
-                                f"Error while extracting contents from file via Tika Parser. Error {exception}")
-                    except Exception as exception:
-                        self.logger.exception(
-                            f"Cannot read the contents of the file. Error {exception}")
+                    doc['body'] = self.fetch_file_content(service_name, file_details, connection)
                     documents.append(doc)
             connection.close()
         else:
@@ -164,8 +154,8 @@ class Files:
             raise ConnectionError
         return documents
 
-    def check_file_in_network_drive(self, conn, drive_name, folder_path,
-                                    file_structure, ids_list, visited_folders, deleted_folders):
+    def is_file_present_on_network_drive(self, conn, drive_name, folder_path,
+                                         file_structure, ids_list, visited_folders, deleted_folders):
         """Checks that folder/file present in Network Drives or not
             :param conn: connection object
             :param drive_name: service name of the Network Drives
@@ -197,8 +187,35 @@ class Files:
                 return True
             elif status == STATUS_OBJECT_PATH_NOT_FOUND:
                 folder_path, _ = os.path.split(folder_path)
-                folder_deleted = self.check_file_in_network_drive(conn, drive_name, folder_path, file_structure,
-                                                                  ids_list, visited_folders, deleted_folders)
+                folder_deleted = self.is_file_present_on_network_drive(conn, drive_name, folder_path, file_structure,
+                                                                       ids_list, visited_folders, deleted_folders)
             else:
                 self.logger.exception(f"Error while retrieving files from drive {drive_name}.Error: {exception}")
         return folder_deleted
+
+    def fetch_file_content(self, service_name, file_details, connection):
+        """This method is used to fetch content from Network Drives file
+        :param service_name: name of the drive
+        :param file_details: dictionary containing file details
+        :param connection: connection object
+        """
+        file_obj = tempfile.NamedTemporaryFile()
+        try:
+            connection.retrieveFile(service_name, file_details.get('file_path'), file_obj)
+            file_obj.seek(0)
+            try:
+                return extract(file_obj.read())
+            except TikaException as exception:
+                self.logger.exception(
+                    f"Error while extracting contents from file {file_details.get('file_name')} via Tika Parser. \
+                        Error {exception}")
+        except Exception as exception:
+            if isinstance(exception, OSError) and exception.errno == errno.ENOSPC:
+                self.logger.exception(
+                    f"We reached the memory limit for extracting the file: {file_details.get('file_name')}. \
+                        Skipping the contents of this file. Error: {exception}"
+                )
+            else:
+                self.logger.exception(
+                    f"Cannot read the contents of the file {file_details.get('file_name')} . Error {exception}")
+        file_obj.close()
