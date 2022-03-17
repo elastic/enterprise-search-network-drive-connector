@@ -23,7 +23,6 @@ class PermissionSyncDisabledException(Exception):
 
     def __init__(self, message="Provided configuration was invalid"):
         super().__init__(message)
-        self.message = message
 
 
 class EmptyMappingException(Exception):
@@ -36,7 +35,6 @@ class EmptyMappingException(Exception):
 
     def __init__(self, message="Mapping not found"):
         super().__init__(message)
-        self.message = message
 
 
 class PermissionSyncCommand(BaseCommand):
@@ -110,7 +108,6 @@ class PermissionSyncCommand(BaseCommand):
             self.logger.warning('Exiting as the enable permission flag is set to False')
             raise PermissionSyncDisabledException
         if (self.user_mapping and os.path.exists(self.user_mapping) and os.path.getsize(self.user_mapping) > 0):
-            self.remove_all_permissions()
             mappings = {}
             with open(self.user_mapping, encoding='utf-8') as mapping_file:
                 try:
@@ -123,8 +120,9 @@ class PermissionSyncCommand(BaseCommand):
                         else:
                             mappings[enterprise_search_user] = [network_drive_sid]
                 except csv.Error as e:
-                    self.logger.exception(f"Error while reading user mapping file \
-                    at the location: {self.user_mapping}. Error: {e}")
+                    self.logger.exception(f"Error while reading user mapping file at the location: \
+                        {self.user_mapping}. Error: {e}")
+            self.remove_all_permissions()
             for key, val in mappings.items():
                 self.workplace_add_permission(key, val)
         else:
