@@ -90,7 +90,7 @@ class BaseCommand:
         """Get the object for indexing rules to check should the file be indexed or not
             based on the patterns defined in configuration file.
         """
-        return IndexingRules()
+        return IndexingRules(self.config)
 
     @cached_property
     def local_storage(self):
