@@ -31,6 +31,7 @@ STATUS_OBJECT_PATH_NOT_FOUND = 3221225530
 class Files:
     """This class fetches objects from Network Drives
     """
+
     def __init__(self, logger, config, client):
         self.logger = logger
         self.user_mapping = config.get_value("network_drive_enterprise_search.user_mapping")
@@ -39,29 +40,29 @@ class Files:
         self.enable_document_permission = config.get_value("enable_document_permission")
         self.network_drives_client = client
 
-    def recursive_fetch(self, conn, service_name, path, store):
+    def recursive_fetch(self, smb_connection, service_name, path, store):
         """This method is used to recursively fetch folder paths from Network Drives.
-            :param conn: SMB connection object
+            :param smb_connection: SMB connection object
             :param service_name: name of the drive
             :param path: Path of the Network Drives
             :param store: temporary storage for fetched ids from Drive
             :returns: list of all the folder paths in network drives
         """
         try:
-            file_list = conn.listPath(service_name, rf'{path}', search=16)
+            file_list = smb_connection.listPath(service_name, rf'{path}', search=16)
         except Exception as exception:
-            self.logger.exception(f"Unknown Error while fetching files {exception}")
+            self.logger.exception(f"Unknown error while fetching files {exception}")
             return store
-        for each_file in file_list:
-            if each_file.filename not in ['.', '..']:
-                file_name = each_file.filename
-                self.recursive_fetch(conn, service_name, os.path.join(path, file_name), store)
+        for file in file_list:
+            if file.filename not in ['.', '..']:
+                file_name = file.filename
+                self.recursive_fetch(smb_connection, service_name, os.path.join(path, file_name), store)
         store.append(path)
         return store
 
-    def extract_files(self, conn, service_name, path, time_range, indexing_rules):
+    def extract_files(self, smb_connection, service_name, path, time_range, indexing_rules):
         """
-            :param conn: SMB connection object
+            :param smb_connection: SMB connection object
             :param service_name: name of the drive
             :param path: Path of the Network Drives
             :param time_range: Start and End Time
@@ -70,40 +71,47 @@ class Files:
         """
         storage = {}
         try:
-            file_list = conn.listPath(service_name, rf'{path}')
+            file_list = smb_connection.listPath(service_name, rf'{path}')
         except Exception as exception:
-            self.logger.exception(f"Unknown Error while extracting files from folder {path}.Error {exception}")
+            self.logger.exception(f"Unknown error while extracting files from folder {path}.Error {exception}")
             return storage
-        for each_file in file_list:
-            if not each_file.isDirectory:
-                file_name = each_file.filename
+        for file in file_list:
+            if not file.isDirectory:
+                file_name = file.filename
                 updated_at = \
-                    time.strftime(constant.RFC_3339_DATETIME_FORMAT, time.gmtime(each_file.last_attr_change_time))
+                    time.strftime(constant.RFC_3339_DATETIME_FORMAT, time.gmtime(file.last_attr_change_time))
                 created_at = \
-                    time.strftime(constant.RFC_3339_DATETIME_FORMAT, time.gmtime(each_file.create_time))
+                    time.strftime(constant.RFC_3339_DATETIME_FORMAT, time.gmtime(file.create_time))
                 file_path = os.path.join(path, file_name)
-                file_details = {'updated_at': updated_at, 'file_type': os.path.splitext(file_name)[1],
-                                'file_size': each_file.file_size,
-                                'created_at': created_at, 'file_name': file_name, 'file_path': file_path,
-                                'web_path': f"file://{self.server_ip}/{service_name}/{file_path}"}
-                is_indexable = indexing_rules.apply_rules(file_details)
-                if is_indexable and parse(time_range.get('start_time')) < parse(updated_at) and \
-                        parse(updated_at) <= parse(time_range.get('end_time')):
-                    file_id = each_file.file_id if each_file.file_id else hash_id(file_name, path)
+                file_details = {
+                    'updated_at': updated_at,
+                    'file_type': os.path.splitext(file_name)[1],
+                    'file_size': file.file_size,
+                    'created_at': created_at,
+                    'file_name': file_name,
+                    'file_path': file_path,
+                    'web_path': f"file://{self.server_ip}/{service_name}/{file_path}"
+                }
+                is_indexable = indexing_rules.should_index(file_details)
+                if is_indexable \
+                    and parse(time_range.get('start_time')) < parse(updated_at) \
+                        and parse(updated_at) <= parse(time_range.get('end_time')):
+                    file_id = file.file_id if file.file_id else hash_id(file_name, path)
                     storage.update({file_id: file_details})
         return storage
 
-    def retrieve_permission(self, conn, service_name, path):
+    def retrieve_permission(self, smb_connection, service_name, file_path):
         """This method is used to retrieve permission from Network Drives.
-            :param conn: SMB connection object
+            :param smb_connection: SMB connection object
             :param service_name: name of the drive
-            :param path: Path of the Network Drives
-            :returns: tuple of allow and deny permissions lists
+            :param file_path: Path of the Network Drives
+            :returns: hash of allow and deny permissions lists
         """
         try:
-            security_info = conn.getSecurity(service_name, rf'{path}')
+            security_info = smb_connection.getSecurity(service_name, rf'{file_path}')
         except Exception as exception:
-            self.logger.exception(f"Unknown Error while fetching permission details for file {path}. Error {exception}")
+            self.logger.exception(f"Unknown error while fetching permission details for file {file_path}.\
+            Error {exception}")
             return [], []
         allow_users = []
         deny_users = []
@@ -119,8 +127,8 @@ class Files:
                 if not fetch_users_from_csv_file(self.user_mapping, self.logger).get(sid):
                     self.logger.warning(f"No mapping found for sid:{sid} in csv file. \
                         Please add the sid->user mapping for the {sid} and rerun the \
-                        sync_user_permissions.py to sync the user mappings.")
-        return allow_users, deny_users
+                        permission_sync_command to sync the user mappings.")
+        return {'allow': allow_users, 'deny': deny_users}
 
     def fetch_files(self, service_name, path_list, time_range, indexing_rules):
         """This method is used to fetch and index files to Workplace Search
@@ -131,33 +139,31 @@ class Files:
         """
         schema = adapter.FILES
         documents = []
-        connection = self.network_drives_client.connect()
-        if connection:
+        smb_connection = self.network_drives_client.connect()
+        if smb_connection:
             for folder_path in path_list:
-                storage = self.extract_files(connection, service_name, folder_path, time_range, indexing_rules)
+                storage = self.extract_files(smb_connection, service_name, folder_path, time_range, indexing_rules)
                 for file_id, file_details in storage.items():
                     doc = {}
                     for field, file_field in schema.items():
                         doc[field] = file_details.get(file_field)
                     doc.update({'body': {}, 'id': str(file_id)})
                     if self.enable_document_permission:
-                        allow_user_permission, \
-                            deny_user_permission = self.retrieve_permission(connection, service_name,
-                                                                            file_details.get("file_path"))
-                        doc['_allow_permissions'] = allow_user_permission
-                        doc['_deny_permissions'] = deny_user_permission
-                    doc['body'] = self.fetch_file_content(service_name, file_details, connection)
+                        permissions = self.retrieve_permission(
+                            smb_connection, service_name, file_details.get("file_path"))
+                        doc['_allow_permissions'] = permissions['allow']
+                        doc['_deny_permissions'] = permissions['deny']
+                    doc['body'] = self.fetch_file_content(service_name, file_details, smb_connection)
                     documents.append(doc)
-            connection.close()
+            smb_connection.close()
         else:
-            self.logger.exception("Unknown error while connecting to network drives")
-            raise ConnectionError
+            raise ConnectionError("Unknown error while connecting to network drives")
         return documents
 
-    def is_file_present_on_network_drive(self, conn, drive_name, folder_path,
+    def is_file_present_on_network_drive(self, smb_connection, drive_name, folder_path,
                                          file_structure, ids_list, visited_folders, deleted_folders):
         """Checks that folder/file present in Network Drives or not
-            :param conn: connection object
+            :param smb_connection: connection object
             :param drive_name: service name of the Network Drives
             :param folder_path: the relative path of the folder
             :param file_structure: dictionary containing folder and list of files inside the folder
@@ -170,10 +176,10 @@ class Files:
         folder_deleted = False
         try:
             drive_path = Path(self.drive_path)
-            available_files = conn.listPath(drive_path.parts[0], folder_path)
-            for each_file in available_files:
-                if file_structure[folder_path].get(each_file.filename):
-                    file_structure[folder_path].pop(each_file.filename)
+            available_files = smb_connection.listPath(drive_path.parts[0], folder_path)
+            for file in available_files:
+                if file_structure[folder_path].get(file.filename):
+                    file_structure[folder_path].pop(file.filename)
             ids_list.extend(list(file_structure[folder_path].values()))
             visited_folders.append(folder_path)
         except Exception as exception:
@@ -187,24 +193,27 @@ class Files:
                 return True
             elif status == STATUS_OBJECT_PATH_NOT_FOUND:
                 folder_path, _ = os.path.split(folder_path)
-                folder_deleted = self.is_file_present_on_network_drive(conn, drive_name, folder_path, file_structure,
+                folder_deleted = self.is_file_present_on_network_drive(smb_connection, drive_name, folder_path,
+                                                                       file_structure,
                                                                        ids_list, visited_folders, deleted_folders)
             else:
                 self.logger.exception(f"Error while retrieving files from drive {drive_name}.Error: {exception}")
         return folder_deleted
 
-    def fetch_file_content(self, service_name, file_details, connection):
+    def fetch_file_content(self, service_name, file_details, smb_connection):
         """This method is used to fetch content from Network Drives file
         :param service_name: name of the drive
         :param file_details: dictionary containing file details
-        :param connection: connection object
+        :param smb_connection: connection object
         """
         file_obj = tempfile.NamedTemporaryFile()
         try:
-            connection.retrieveFile(service_name, file_details.get('file_path'), file_obj)
+            smb_connection.retrieveFile(service_name, file_details.get('file_path'), file_obj)
             file_obj.seek(0)
             try:
-                return extract(file_obj.read())
+                extracted_content = extract(file_obj.read())
+                file_obj.close()
+                return extracted_content
             except TikaException as exception:
                 self.logger.exception(
                     f"Error while extracting contents from file {file_details.get('file_name')} via Tika Parser. \

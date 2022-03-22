@@ -14,6 +14,11 @@ from wcmatch import glob
 class IndexingRules:
     """This class holds methods used to apply indexing filters on the documents to be indexed
     """
+
+    def __init__(self, config):
+        self.include = config.get_value("include")
+        self.exclude = config.get_value("exclude")
+
     def filter_size(self, file_details, symbol, pattern):
         """This method is used to find if the file size is matching with the pattern
             :param file_details: dictionary containing file properties
@@ -35,23 +40,22 @@ class IndexingRules:
         }
         return operation.get(symbol)
 
-    def apply_rules(self, file_details, include, exclude):
+    def should_index(self, file_details):
         """This method is used to check if the current file is following the indexing rule or not
             :param file_details: dictionary containing file properties
             :param include: include pattern provided for matching
             :param exclude: exclude pattern for matching
             :returns: True or False denoting if the file is to following the indexing rule or not
         """
-        inc, exc = True, True
-        if include:
-            inc = self.include_exclude(include, {}, file_details, 'include')
-        if exclude:
-            exc = self.include_exclude(exclude, include, file_details, 'exclude')
-        return inc and exc
+        should_include, should_exclude = True, True
+        if self.include:
+            should_include = self.should_include_or_exclude(self.include, {}, file_details, 'include')
+        if self.exclude:
+            should_exclude = self.should_include_or_exclude(self.exclude, self.include, file_details, 'exclude')
+        return should_include and should_exclude
 
-    def include_exclude(self, pattern_dict, is_present_in_include, file_details, pattern_type):
-        """Helper function used to redirect the filtering based on filtertype(size/path)
-           and pattern type(include/exclude)
+    def should_include_or_exclude(self, pattern_dict, is_present_in_include, file_details, pattern_type):
+        """Function to decide wether to include the file or exclude it based on the indexing rules defined in the configuration
            :param pattern_dict: Dictionary containing key value pairs as filter type and list of patterns
            :param is_present_in_include: Used to check if any pattern is already present in include type
            :param file_details: dictionary containing file properties
@@ -62,15 +66,16 @@ class IndexingRules:
             for value in (pattern or []):
                 if is_present_in_include and (value in (is_present_in_include.get(filtertype) or [])):
                     pattern.remove(value)
-            result = self.filter_pattern(filtertype, pattern, file_details, pattern_type)
+            result = self.follows_indexing_rule(filtertype, pattern, file_details, pattern_type)
             if result is False:
                 should_index = False
             elif result is True:
                 return True
         return should_index
 
-    def filter_pattern(self, filtertype, pattern, file_details, pattern_type):
-        """This method is used to connect with Network Drives.
+    def follows_indexing_rule(self, filtertype, pattern, file_details, pattern_type):
+        """Applies filters on the file and returns True or False based on whether
+           it follows the pattern or not
             :filtertype: denotes the type of filter used: size/path_template
             :param pattern: include/ exclude pattern provided for matching
             :param file_details: dictionary containing file properties

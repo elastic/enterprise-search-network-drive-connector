@@ -41,15 +41,14 @@ class Indexer:
                         content_source_id=self.config.get_value("enterprise_search.source_id"),
                         documents=chunk
                     )
-                    for each in response['results']:
-                        if not each['errors']:
+                    for document in response['results']:
+                        if not document['errors']:
                             self.total_documents_indexed += 1
                         else:
                             self.logger.error(
-                                f"Unable to index the document with id: {each['id']} Error {each['errors']}")
+                                f"Unable to index the document with id: {document['id']} Error {document['errors']}")
         except Exception as exception:
-            self.logger.exception(f"Error while indexing the files. Error: {exception}"
-                                  )
+            self.logger.exception(f"Error while indexing the files. Error: {exception}")
             raise exception
 
     def threaded_index_documents(self, documents):
@@ -62,7 +61,8 @@ class Indexer:
         thread_pool.close()
         thread_pool.join()
 
-        self.logger.info(f"Successfully indexed {self.total_documents_indexed} to workplace out of {len(documents)}")
+        self.logger.info(
+            f"Successfully indexed {self.total_documents_indexed} to the workplace out of {len(documents)}")
 
     def partition_equal_share(self, list_path, total_groups):
         """divides the list in groups of approximately equal sizes
@@ -78,20 +78,22 @@ class Indexer:
         else:
             return []
 
-    def indexing(self, drive, ids, drive_path, indexing_rules):
+    def fetch_and_index_files(self, drive, ids, drive_path, indexing_rules):
         """This method fetches all the objects from Network Drives server and
             ingests them into the workplace search
             :param drive: drive name
             :param ids: temporary storage containing ids and path of the files from doc_id.json
             :param drive_path: path to network drives
             :param indexing_rules: object of indexing rules
+            Returns:
+                storage: dictionary containing the ids and path of all the files in Network Drives
         """
-        connection = self.network_drive_client.connect()
-        if connection:
+        smb_connection = self.network_drive_client.connect()
+        if smb_connection:
             files = Files(self.logger, self.config, self.network_drive_client)
-            store = files.recursive_fetch(conn=connection, service_name=drive_path.parts[0],
+            store = files.recursive_fetch(smb_connection=smb_connection, service_name=drive_path.parts[0],
                                           path=os.path.join(*drive_path.parts[1:]), store=[])
-            connection.close()
+            smb_connection.close()
             partition_paths = self.partition_equal_share(store, self.max_threads)
             if partition_paths:
                 documents = []
@@ -120,11 +122,11 @@ class Indexer:
             storage["files"] = prev_ids
             return storage
         else:
-            self.logger.exception("Connection not established")
-            raise ConnectionError
+            raise ConnectionError("Connection not established")
 
 
-def start(time_range, config, logger, workplace_search_client, network_drive_client, indexing_rules, storage_obj):
+def sync_network_drive(time_range, config, logger, workplace_search_client, network_drive_client, indexing_rules,
+                       storage_obj):
     """Runs the indexing logic
         :param time_range: the duration considered for fetching files from network drives
         :param config: configuration object
@@ -135,13 +137,9 @@ def start(time_range, config, logger, workplace_search_client, network_drive_cli
         :storage_obj: object for LocalStorage class used to fetch/update ids stored locally
     """
     logger.info("Starting the indexing..")
-    ids_collection = {"global_keys": {}}
     storage_with_collection = {"global_keys": {}, "delete_keys": {}}
 
-    try:
-        ids_collection = storage_obj.load_storage()
-    except FileNotFoundError:
-        logger.debug("Local storage for ids was not found.")
+    ids_collection = storage_obj.load_storage()
 
     storage_with_collection["delete_keys"] = copy.deepcopy(ids_collection.get("global_keys"))
 
@@ -158,7 +156,7 @@ def start(time_range, config, logger, workplace_search_client, network_drive_cli
             ids_collection["global_keys"][drive] = {
                 "files": {}}
         indexer = Indexer(logger, config, time_range, workplace_search_client, network_drive_client)
-        storage_with_collection["global_keys"][drive] = indexer.indexing(
+        storage_with_collection["global_keys"][drive] = indexer.fetch_and_index_files(
             drive, ids_collection["global_keys"][drive], drive_path, indexing_rules)
         logger.info(
             f"Saving the checkpoint for the drive: {drive}"

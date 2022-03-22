@@ -13,7 +13,7 @@
 """
 
 from .base_command import BaseCommand
-from .indexer import start
+from .indexer import sync_network_drive
 from .checkpointing import Checkpoint
 from .utils import get_current_time
 
@@ -35,6 +35,7 @@ class IncrementalSyncCommand(BaseCommand):
         start_time, end_time = checkpoint.get_checkpoint(current_time, drive)
         time_range = {"start_time": start_time, "end_time": end_time}
         logger.info(f"Indexing started at: {current_time}")
-        start(time_range, config, logger, workplace_search_client, network_drive_client, indexing_rules, storage_obj)
+        sync_network_drive(time_range, config, logger, workplace_search_client, network_drive_client,
+                           indexing_rules, storage_obj)
         checkpoint.set_checkpoint(end_time, INDEXING_TYPE, drive)
         logger.info(f"Indexing ended at: {get_current_time()}")
