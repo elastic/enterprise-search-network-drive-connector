@@ -38,8 +38,10 @@ end_time :
 log_level: INFO
 #The number of retries to perform in case of server error. The connector will use exponential back-off for retry mechanism
 retry_count: 3
-#Maximum number of threads to be used for the connector.
-max_threads: 40
+#Number of threads to be used in multithreading for the sharepoint sync.
+network_drives_sync_thread_count: 5
+#Number of threads to be used in multithreading for the enterprise search sync.
+enterprise_search_sync_thread_count: 5
 #Denotes whether document permission will be enabled or not
 enable_document_permission: Yes
 #The path of csv file containing mapping of Network Drive user ID to Workplace user ID
