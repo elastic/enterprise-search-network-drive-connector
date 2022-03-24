@@ -38,12 +38,12 @@ def test_network_drive(settings):
     configs, logger = settings
     print("Starting Network Drives connectivity tests..")
     network_drive_client = NetworkDrive(configs, logger)
-    conn = network_drive_client.connect()
-    if not conn:
+    smb_connection = network_drive_client.connect()
+    if not smb_connection:
         assert False, f"Error while connecting to Network Drives at {configs.get_value('network_drive.server_ip')}"
     else:
         assert True
-    conn.close()
+    smb_connection.close()
     print("Network Drives connectivity tests completed..")
 
 

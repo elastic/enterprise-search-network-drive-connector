@@ -32,15 +32,15 @@ class NetworkDrive:
     def connect(self):
         """This method is used to connect with Network Drives.
         """
-        conn = SMBConnection(self.username, self.password, self.client_machine_name, self.server_name, self.domain,
-                             use_ntlm_v2=USE_NTLM_V2, is_direct_tcp=IS_DIRECT_TCP)
+        smb_connection = SMBConnection(self.username, self.password, self.client_machine_name, self.server_name,
+                                       self.domain, use_ntlm_v2=USE_NTLM_V2, is_direct_tcp=IS_DIRECT_TCP)
         try:
-            response = conn.connect(self.server_ip, SERVER_PORT)
+            response = smb_connection.connect(self.server_ip, SERVER_PORT)
             if response:
-                return conn
+                return smb_connection
         except (NotConnectedError, SMBTimeout) as exception:
             raise exception
         except Exception as exception:
             self.logger.exception(
-                f"Unknown Error while connecting to Network Drives. Error: {exception}"
+                f"Unknown error while connecting to Network Drives. Error: {exception}"
             )
