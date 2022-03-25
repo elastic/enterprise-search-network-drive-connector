@@ -1,6 +1,11 @@
 import logging
 import os
-from ees_network_drive.utils import split_list_into_buckets, fetch_users_from_csv_file
+import sys
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+
+from ees_network_drive.utils import split_list_into_buckets, fetch_users_from_csv_file  # noqa
 
 
 def test_split_list_into_buckets():

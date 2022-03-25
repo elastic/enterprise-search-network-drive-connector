@@ -1,10 +1,16 @@
 import pytest
 from unittest.mock import Mock
 import logging
-from ees_network_drive.sync_enterprise_search import SyncEnterpriseSearch
-from ees_network_drive.connector_queue import ConnectorQueue
-from elastic_enterprise_search import WorkplaceSearch
-from ees_network_drive.configuration import Configuration
+import sys
+import os
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+
+from ees_network_drive.sync_enterprise_search import SyncEnterpriseSearch  # noqa
+from ees_network_drive.connector_queue import ConnectorQueue  # noqa
+from elastic_enterprise_search import WorkplaceSearch  # noqa
+from ees_network_drive.configuration import Configuration  # noqa
 
 
 def settings():

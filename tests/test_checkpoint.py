@@ -8,9 +8,13 @@ import json
 import datetime
 import os
 import logging
-from ees_network_drive.checkpointing import Checkpoint
-from ees_network_drive.constant import RFC_3339_DATETIME_FORMAT
-from ees_network_drive.configuration import Configuration
+import sys
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+from ees_network_drive.checkpointing import Checkpoint # noqa
+from ees_network_drive.constant import RFC_3339_DATETIME_FORMAT # noqa
+from ees_network_drive.configuration import Configuration # noqa
 
 
 CHECKPOINT_PATH = os.path.join(

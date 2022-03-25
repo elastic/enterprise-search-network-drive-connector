@@ -8,10 +8,14 @@ import os
 from unittest.mock import Mock
 import argparse
 import logging
-from ees_network_drive.deletion_sync_command import DeletionSyncCommand
-from ees_network_drive.configuration import Configuration
-from ees_network_drive.network_drive_client import NetworkDrive
-from ees_network_drive.files import Files
+import sys
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+from ees_network_drive.deletion_sync_command import DeletionSyncCommand # noqa
+from ees_network_drive.configuration import Configuration # noqa
+from ees_network_drive.network_drive_client import NetworkDrive # noqa
+from ees_network_drive.files import Files # noqa
 
 DUMMY_FILE_1 = "dummy/test.txt"
 DUMMY_FILE_2 = "dummy/test1.txt"
