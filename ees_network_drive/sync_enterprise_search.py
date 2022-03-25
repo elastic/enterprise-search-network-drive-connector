@@ -20,10 +20,10 @@ class SyncEnterpriseSearch:
         self.logger = logger
         self.workplace_search_client = workplace_search_client
         self.queue = queue
-        self.enterprise_search_thread_count = config.get_value(
-            "enterprise_search_thread_count"
+        self.enterprise_search_sync_thread_count = config.get_value(
+            "enterprise_search_sync_thread_count"
         )
-        self.thread_pool = ThreadPool(self.enterprise_search_thread_count)
+        self.thread_pool = ThreadPool(self.enterprise_search_sync_thread_count)
 
     def index_documents(self, documents):
         """This method indexes the documents to the Enterprise Search.
@@ -56,7 +56,7 @@ class SyncEnterpriseSearch:
         """Pull documents from the queue and index it to the Enterprise Search."""
         signal_open = True
         while signal_open:
-            for _ in range(self.enterprise_search_thread_count):
+            for _ in range(self.enterprise_search_sync_thread_count):
                 documents_to_index = []
                 while len(documents_to_index) < BATCH_SIZE:
                     documents = self.queue.get()
