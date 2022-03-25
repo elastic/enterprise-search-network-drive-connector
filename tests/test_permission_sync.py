@@ -15,7 +15,10 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from ees_network_drive.permission_sync_command import PermissionSyncCommand  # noqa
 from ees_network_drive.configuration import Configuration  # noqa
 
-CONFIG_FILE = "network_drive_connector.yml"
+CONFIG_FILE = os.path.join(
+    os.path.join(os.path.dirname(__file__), "config"),
+    "network_drive_connector.yml",
+)
 
 
 def settings():
