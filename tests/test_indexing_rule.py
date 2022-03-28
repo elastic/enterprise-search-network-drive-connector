@@ -19,7 +19,7 @@ def settings():
     """This function loads config from the file and returns it."""
     configuration = Configuration(file_name=CONFIG_FILE)
 
-    logger = logging.getLogger("unit_test_indexing")
+    logger = logging.getLogger("unit_test_indexing_rules")
     return configuration, logger
 
 
@@ -32,13 +32,13 @@ def settings():
             "body": "Not much. It is a made up thing.",
             "created_at": "2019-06-01T12:00:00+00:00",
             "type": "text",
-            "file_path": "dummy_folder/temp0.txt",
+            "file_path": "dummy_folder/file0.txt",
             "file_size": 23000
         }
     ],
 )
 def test_should_index(file_details):
-    """Test that index_document successfully index documents in workplace."""
+    """Test that should_index returns False if the file does not follow the indexing rule"""
     config, logger = settings()
     indexing_rules_obj = IndexingRules(config)
     result = indexing_rules_obj.should_index(file_details)
