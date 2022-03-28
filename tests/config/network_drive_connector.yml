@@ -26,7 +26,7 @@ enterprise_search.host_url: "https://dummy_host/"
 #Specifies the objects to be fetched and indexed in the WorkPlace search along with fields that needs to be included/excluded. The list of the objects with a pattern to be included/excluded is provided. By default all the objects are fetched
 include:
    size:
-   path_template: ['**/.gif','**/.jpg','**/.png','**/Play/.png']
+   path_template: ['**/*.gif','**/*.jpg','**/*.png']
 exclude:
   size: ['>15000']
   path_template:

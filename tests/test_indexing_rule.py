@@ -37,9 +37,31 @@ def settings():
         }
     ],
 )
-def test_should_index(file_details):
+def test_should_index_when_indexing_rules_not_followed(file_details):
     """Test that should_index returns False if the file does not follow the indexing rule"""
     config, logger = settings()
     indexing_rules_obj = IndexingRules(config)
     result = indexing_rules_obj.should_index(file_details)
     assert result == False
+
+
+@pytest.mark.parametrize(
+    "file_details",
+    [
+        {
+            "id": 1,
+            "title": "file1",
+            "body": "This is just a test.",
+            "created_at": "2020-06-01T12:00:00+00:00",
+            "type": "png",
+            "file_path": "dummy_folder_1/file1.png",
+            "file_size": 3000
+        }
+    ],
+)
+def test_should_index_when_indexing_rule_is_followed(file_details):
+    """"Test that should_index returns True if the file follows the indexing rule"""
+    config, logger = settings()
+    indexing_rules_obj = IndexingRules(config)
+    result = indexing_rules_obj.should_index(file_details)
+    assert result == True

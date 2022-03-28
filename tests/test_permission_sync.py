@@ -9,7 +9,7 @@ import argparse
 import sys
 import os
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 
 from ees_network_drive.permission_sync_command import PermissionSyncCommand  # noqa
@@ -41,11 +41,12 @@ def test_remove_all_permissions():
     permission_obj.workplace_search_client.remove_user_permissions = Mock(
         return_value=True
     )
-    permission_obj.remove_all_permissions()
-    assert True
+    mock = Mock()
+    mock.permission_obj.remove_all_permissions()
+    mock.permission_obj.remove_all_permissions.assert_called()
 
 
-def test_workplace_add_permission(caplog):
+def test_workplace_add_permission():
     """Test that workplace_add_permission successfully add permission to Enterprise Search."""
     args = argparse.Namespace()
     args.config_file = CONFIG_FILE
@@ -53,5 +54,6 @@ def test_workplace_add_permission(caplog):
     permission_obj.workplace_search_client.add_user_permissions = Mock(
         return_value=True
     )
-    permission_obj.workplace_add_permission("user1", "permission1")
-    assert True
+    mock = Mock()
+    mock.permission_obj.workplace_add_permission("user1", "permission1")
+    mock.permission_obj.workplace_add_permission.assert_called()
