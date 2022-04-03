@@ -6,22 +6,9 @@
 """Module responsible for fetching the files from the Network Drives and returning a document with
     all file details in json format.
 """
-import errno
 import os
-import tempfile
-import time
 from pathlib import Path
 
-from dateutil.parser import parse
-from tika.tika import TikaException
-
-from . import adapter, constant
-from .utils import extract, fetch_users_from_csv_file, hash_id
-
-ACCESS_ALLOWED_TYPE = 0
-ACCESS_DENIED_TYPE = 1
-ACCESS_MASK_DENIED_WRITE_PERMISSION = 278
-ACCESS_MASK_ALLOWED_WRITE_PERMISSION = 1048854
 STATUS_NO_SUCH_FILE = 3221225487
 STATUS_NO_SUCH_DEVICE = 3221225486
 STATUS_OBJECT_NAME_NOT_FOUND = 3221225524
