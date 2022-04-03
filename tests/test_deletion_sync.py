@@ -3,18 +3,18 @@
 # or more contributor license agreements. Licensed under the Elastic License 2.0;
 # you may not use this file except in compliance with the Elastic License 2.0.
 #
-import pytest
 import os
 import sys
 
+import pytest
+
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-from unittest.mock import Mock
 import argparse
 import logging
-from ees_network_drive.deletion_sync_command import DeletionSyncCommand
-from ees_network_drive.configuration import Configuration
-from ees_network_drive.network_drive_client import NetworkDrive
-from ees_network_drive.files import Files
+from unittest.mock import Mock
+
+from ees_network_drive.configuration import Configuration       # noqa
+from ees_network_drive.deletion_sync_command import DeletionSyncCommand     # noqa
 
 DUMMY_FILE_1 = "dummy/test.txt"
 DUMMY_FILE_2 = "dummy/test1.txt"
@@ -38,19 +38,15 @@ def settings():
         (
             {
                 "global_keys": {
-                    "dummy": {
-                        "files": {
-                            "844424930334011": DUMMY_FILE_1,
-                            "543528180028451862": DUMMY_FILE_2,
-                        }
+                    "files": {
+                        "844424930334011": DUMMY_FILE_1,
+                        "543528180028451862": DUMMY_FILE_2,
                     }
                 },
                 "delete_keys": {
-                    "dummy": {
-                        "files": {
-                            "844424930334011": DUMMY_FILE_1,
-                            "543528180028451862": DUMMY_FILE_2,
-                        }
+                    "files": {
+                        "844424930334011": DUMMY_FILE_1,
+                        "543528180028451862": DUMMY_FILE_2,
                     }
                 },
             },
@@ -75,11 +71,9 @@ def test_get_deleted_files(ids, drive_name):
         (
             {
                 "global_keys": {
-                    "TEST_SERVER": {
-                        "files": {
-                            "844424930334011": DUMMY_FILE_1,
-                            "543528180028451862": DUMMY_FILE_2,
-                        }
+                    "files": {
+                        "844424930334011": DUMMY_FILE_1,
+                        "543528180028451862": DUMMY_FILE_2,
                     }
                 }
             },
@@ -89,7 +83,7 @@ def test_get_deleted_files(ids, drive_name):
 )
 def test_sync_deleted_files(ids, deleted_ids):
     """Test that sync_deleted_files delete files from Enterprise Search."""
-    expected_ids = {"global_keys": {"TEST_SERVER": {"files": {}}}}
+    expected_ids = {"global_keys": {"files": {}}}
     args = argparse.Namespace()
     args.config_file = CONFIG_FILE
     deletion_sync_obj = DeletionSyncCommand(args)
