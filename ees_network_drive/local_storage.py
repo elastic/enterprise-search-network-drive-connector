@@ -22,6 +22,7 @@ class LocalStorage:
                     self.logger.exception(
                         f"Error while parsing the json file of the ids store from path: {IDS_PATH}. Error: {exception}"
                     )
+                    return {"global_keys": {}}
         except FileNotFoundError:
             self.logger.debug("Local storage for ids was not found.")
             return {"global_keys": {}}

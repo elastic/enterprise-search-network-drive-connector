@@ -25,7 +25,7 @@ class BootstrapCommand(BaseCommand):
         which instance of Elastic Enterprise Search will be used
         to create a Content Source."""
 
-        logger = self.logger
+        logger = self.logger()
         args = self.args
         workplace_search = self.workplace_search_client
         try:
@@ -62,7 +62,6 @@ class BootstrapCommand(BaseCommand):
             content_source_id = resp.get('id')
             logger.info(
                 f"Created ContentSource with ID {content_source_id}. \
-                You may now begin indexing with content-source-id= {content_source_id}"
-            )
+                    You may now begin indexing with content-source-id= {content_source_id}")
         except Exception as exception:
             logger.error(f"Could not create a content source, Error {exception}")

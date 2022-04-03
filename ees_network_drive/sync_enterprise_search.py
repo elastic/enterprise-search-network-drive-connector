@@ -6,7 +6,7 @@
 """This module allows to sync data to Elastic Enterprise Search.
     It's possible to run full syncs and incremental syncs with this module.
 """
-from multiprocessing.pool import ThreadPool
+import threading
 
 from .constant import BATCH_SIZE
 from .utils import split_documents_into_equal_chunks
@@ -20,67 +20,53 @@ class SyncEnterpriseSearch:
         self.logger = logger
         self.workplace_search_client = workplace_search_client
         self.queue = queue
-        self.enterprise_search_sync_thread_count = config.get_value(
-            "enterprise_search_sync_thread_count"
-        )
-        self.thread_pool = ThreadPool(self.enterprise_search_sync_thread_count)
+        self.ws_source = config.get_value("enterprise_search.source_id")
+        self.enterprise_search_sync_thread_count = config.get_value("enterprise_search_sync_thread_count")
+        self.total_document_indexed = 0
+        self.total_documents_found = 0
 
     def index_documents(self, documents):
         """This method indexes the documents to the Enterprise Search.
         :param documents: list of documents to be indexed
         """
+        self.total_documents_found += len(documents)
         try:
             if documents:
-                total_documents_indexed = 0
+                documents_indexed = 0
                 responses = self.workplace_search_client.index_documents(
-                    content_source_id=self.config.get_value(
-                        "enterprise_search.source_id"
-                    ),
+                    content_source_id=self.ws_source,
                     documents=documents,
                 )
                 for document in responses["results"]:
                     if not document["errors"]:
-                        total_documents_indexed += 1
+                        documents_indexed += 1
                     else:
                         self.logger.error(
                             f"Unable to index the document with id: {document['id']} Error {document['errors']}"
                         )
-                self.logger.info(
-                    f"Successfully indexed {total_documents_indexed} to the workplace out of {len(documents)}"
-                )
+                self.total_document_indexed += documents_indexed
         except Exception as exception:
             self.logger.exception(f"Error while indexing the files. Error: {exception}")
             raise exception
 
     def perform_sync(self):
-        """Pull documents from the queue and index it to the Enterprise Search."""
-        signal_open = True
-        while signal_open:
-            for _ in range(self.enterprise_search_sync_thread_count):
+        """Pull documents from the queue and synchronize it to the Enterprise Search."""
+        try:
+            signal_open = True
+            while signal_open:
                 documents_to_index = []
                 while len(documents_to_index) < BATCH_SIZE:
-                    documents = self.queue.get()
-                    if documents.get("type") == "signal_close":
+                    document = self.queue.get()
+                    if document.get("type") == "signal_close":
                         signal_open = False
                         break
                     else:
-                        documents_to_index.extend(documents.get("data"))
-                for document_list in split_documents_into_equal_chunks(
-                    documents_to_index, BATCH_SIZE
-                ):
-                    self.thread_pool.apply_async(self.index_documents, (document_list,))
-                if not signal_open:
-                    break
-        self.thread_pool.close()
-        self.thread_pool.join()
-
-
-def init_enterprise_search_sync(config, logger, workplace_search_client, queue):
-    """Runs the indexing logic
-    :param config: instance of Configuration class
-    :param logger: instance of Logger class
-    :param workplace_search_client: instance of WorkplaceSearch
-    :param queue: Shared queue to push the objects fetched from Network Drives
-    """
-    indexer = SyncEnterpriseSearch(config, logger, workplace_search_client, queue)
-    indexer.perform_sync()
+                        documents_to_index.extend(document.get("data"))
+            # This loop is to ensure if the last document fetched from the queue exceeds the size
+            # of documents_to_index to more than the permitted chunk size, then we split the documents as per the limit
+            for document_list in split_documents_into_equal_chunks(documents_to_index, BATCH_SIZE):
+                self.index_documents(document_list)
+        except Exception as exception:
+            self.logger.error(exception)
+        self.logger.info(f"Thread ID: {threading.get_ident()} Total {self.total_document_indexed} \
+            documents indexed out of: {self.total_documents_found} till now..")

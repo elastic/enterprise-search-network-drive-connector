@@ -14,12 +14,15 @@ try:
     from functools import cached_property
 except ImportError:
     from cached_property import cached_property
+
+from multiprocessing.pool import ThreadPool
+
 from elastic_enterprise_search import WorkplaceSearch
 
 from .configuration import Configuration
+from .indexing_rule import IndexingRules
 from .local_storage import LocalStorage
 from .network_drive_client import NetworkDrive
-from .indexing_rule import IndexingRules
 
 
 class BaseCommand:
@@ -31,11 +34,10 @@ class BaseCommand:
 
     def execute(self):
         """Run the command.
-        This method is overriden by actual commands with logic
+        This method is overridden by actual commands with logic
         that is specific to each command implementing it."""
         raise NotImplementedError
 
-    @cached_property
     def logger(self):
         """Get the logger instance for the running command.
         log level will be determined by the configuration
@@ -91,6 +93,32 @@ class BaseCommand:
             based on the patterns defined in configuration file.
         """
         return IndexingRules(self.config)
+
+    def create_jobs(self, thread_count, func, args, iterable_list):
+        """Apply async calls using multithreading to the targeted function
+        :param thread_count: Total number of threads to be spawned
+        :param func: The target function on which the async calls would be made
+        :param args: Arguments for the targeted function
+        :param iterable_list: list to iterate over and create thread
+        """
+        thread_pool = ThreadPool(thread_count)
+        results = []
+        documents = {}
+        # If iterable_list is present, then iterate over the list and pass each list element
+        # as an argument to the async function, else iterate over number of threads configured
+        if iterable_list:
+            for list_element in iterable_list:
+                new_args = (*args, list_element)
+                results.append(thread_pool.apply_async(func, new_args))
+        else:
+            for _ in range(thread_count):
+                results.append(thread_pool.apply_async(func, args))
+        for result in results:
+            if result.get():
+                documents.update(result.get())
+        thread_pool.close()
+        thread_pool.join()
+        return documents
 
     @cached_property
     def local_storage(self):
