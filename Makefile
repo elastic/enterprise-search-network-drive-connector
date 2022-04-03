@@ -31,6 +31,7 @@ help:
 	@echo "make lint - run linter against the project"
 	@echo "make clean - remove venv and other temporary files from the project"
 	@echo "make test_connectivity - test connectivity to Network Drives and Enterprise Search"
+	@echo "make update_package - update package with local changes"
 
 .venv_init:
 	${PIP} install virtualenv
@@ -61,6 +62,9 @@ test_connectivity: .installed .venv_init
 	${VENV_DIRECTORY}/${EXEC_DIR}/pytest ${PROJECT_DIRECTORY}/test_connectivity.py
 
 install_package: .installed
+	${PIP} install --user .
+
+update_package: 
 	${PIP} install --user .
 
 uninstall_package:
