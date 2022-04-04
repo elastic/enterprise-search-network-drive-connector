@@ -25,7 +25,7 @@ class BootstrapCommand(BaseCommand):
         which instance of Elastic Enterprise Search will be used
         to create a Content Source."""
 
-        logger = self.logger()
+        logger = self.logger
         args = self.args
         workplace_search = self.workplace_search_client
         try:

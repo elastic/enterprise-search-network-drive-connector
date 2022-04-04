@@ -11,8 +11,6 @@
     Recency is determined by the time when the last successful incremental or full job
     was ran.
 """
-from multiprocessing import Process
-
 from .base_command import BaseCommand
 from .checkpointing import Checkpoint
 from .connector_queue import ConnectorQueue
@@ -33,7 +31,7 @@ class IncrementalSyncCommand(BaseCommand):
         :param queue: Shared queue to store the fetched documents
         :param time_range: Time range dictionary storing start time and end time
         """
-        logger = self.logger()
+        logger = self.logger
         sync_network_drives = SyncNetworkDrives(
             logger,
             self.config,
@@ -74,7 +72,7 @@ class IncrementalSyncCommand(BaseCommand):
         """This method starts async calls for the consumer which is responsible for indexing documents to the Enterprise Search
         :param queue: Shared queue to fetch the stored documents
         """
-        logger = self.logger()
+        logger = self.logger
         thread_count = self.config.get_value("enterprise_search_sync_thread_count")
         sync_es = SyncEnterpriseSearch(self.config, logger, self.workplace_search_client, queue)
 
@@ -83,7 +81,7 @@ class IncrementalSyncCommand(BaseCommand):
     def execute(self):
         """This function execute the incremental sync."""
         config = self.config
-        logger = self.logger()
+        logger = self.logger
         current_time = get_current_time()
         checkpoint = Checkpoint(config, logger)
         drive = config.get_value("network_drive.server_name")
@@ -93,18 +91,7 @@ class IncrementalSyncCommand(BaseCommand):
         logger.info(f"Indexing started at: {current_time}")
 
         queue = ConnectorQueue()
-        producer = Process(name="producer", target=self.start_producer, args=(queue, time_range))
-        producer.start()
-
-        consumer = Process(
-            name="consumer_process",
-            target=self.start_consumer,
-            args=(queue,),
-        )
-        consumer.start()
-
-        producer.join()
-        consumer.join()
-
+        self.start_producer(queue, time_range)
+        self.start_consumer(queue)
         checkpoint.set_checkpoint(current_time, INDEXING_TYPE, drive)
         logger.info(f"Indexing ended at: {get_current_time()}")

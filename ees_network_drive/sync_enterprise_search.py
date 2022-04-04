@@ -62,11 +62,11 @@ class SyncEnterpriseSearch:
                         break
                     else:
                         documents_to_index.extend(document.get("data"))
-            # This loop is to ensure if the last document fetched from the queue exceeds the size
-            # of documents_to_index to more than the permitted chunk size, then we split the documents as per the limit
-            for document_list in split_documents_into_equal_chunks(documents_to_index, BATCH_SIZE):
-                self.index_documents(document_list)
+                # This loop is to ensure if the last document fetched from the queue exceeds the size of
+                # documents_to_index to more than the permitted chunk size, then we split the documents as per the limit
+                for document_list in split_documents_into_equal_chunks(documents_to_index, BATCH_SIZE):
+                    self.index_documents(document_list)
         except Exception as exception:
             self.logger.error(exception)
-        self.logger.info(f"Thread ID: {threading.get_ident()} Total {self.total_document_indexed} \
-            documents indexed out of: {self.total_documents_found} till now..")
+        self.logger.info(f"Thread ID: {threading.get_ident()} Total {self.total_document_indexed} documents \
+            indexed out of: {self.total_documents_found} till now..")

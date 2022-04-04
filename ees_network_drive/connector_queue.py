@@ -5,8 +5,6 @@
 #
 import multiprocessing
 from multiprocessing.queues import Queue
-from .utils import split_documents_into_equal_chunks
-from .constant import BATCH_SIZE
 
 
 class ConnectorQueue(Queue):
@@ -41,6 +39,5 @@ class ConnectorQueue(Queue):
         :param documents: documents fetched from sharepoint
         """
         if documents:
-            for chunk in split_documents_into_equal_chunks(documents, BATCH_SIZE):
-                document = {"type": "document_list", "data": chunk}
-                self.put(document)
+            document = {"type": "document_list", "data": documents}
+            self.put(document)
