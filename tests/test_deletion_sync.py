@@ -7,17 +7,23 @@ import os
 import sys
 
 import pytest
-
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 import argparse
 import logging
 from unittest.mock import Mock
 
-from ees_network_drive.configuration import Configuration       # noqa
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
+from ees_network_drive.configuration import Configuration   # noqa
 from ees_network_drive.deletion_sync_command import DeletionSyncCommand     # noqa
 
-DUMMY_FILE_1 = "dummy/test.txt"
-DUMMY_FILE_2 = "dummy/test1.txt"
+
+ROOT_DIR_FILE = '/file_in_root.txt'
+FILE_1_IN_PARENT_FOLDER = '/folder_in_root/file1.txt'
+FILE_2_IN_PARENT_FOLDER = '/folder_in_root/file2.txt'
+FILE_3_IN_SUB_FOLDER = '/folder_in_root/folder_in_folder_with_files/file3.txt'
+FILE_4_IN_SUB_FOLDER = '/folder_in_root/folder_in_folder_with_files/file4.txt'
+EMPTY_SUB_FOLDER = '/folder_in_root/folder_in_folder_with_no_files/'
+
 CONFIG_FILE = os.path.join(
     os.path.join(os.path.dirname(__file__), "config"),
     "network_drive_connector.yml",
@@ -39,14 +45,20 @@ def settings():
             {
                 "global_keys": {
                     "files": {
-                        "844424930334011": DUMMY_FILE_1,
-                        "543528180028451862": DUMMY_FILE_2,
+                        "844424930334011": ROOT_DIR_FILE,
+                        "543528180028451862": FILE_1_IN_PARENT_FOLDER,
+                        "840733669383922639": FILE_2_IN_PARENT_FOLDER,
+                        "557788652057687615": FILE_3_IN_SUB_FOLDER,
+                        "627114226410696732": FILE_4_IN_SUB_FOLDER,
                     }
                 },
                 "delete_keys": {
                     "files": {
-                        "844424930334011": DUMMY_FILE_1,
-                        "543528180028451862": DUMMY_FILE_2,
+                        "844424930334011": ROOT_DIR_FILE,
+                        "543528180028451862": FILE_1_IN_PARENT_FOLDER,
+                        "840733669383922639": FILE_2_IN_PARENT_FOLDER,
+                        "557788652057687615": FILE_3_IN_SUB_FOLDER,
+                        "627114226410696732": FILE_4_IN_SUB_FOLDER,
                     }
                 },
             },
@@ -72,18 +84,46 @@ def test_get_deleted_files(ids, drive_name):
             {
                 "global_keys": {
                     "files": {
-                        "844424930334011": DUMMY_FILE_1,
-                        "543528180028451862": DUMMY_FILE_2,
+                        "844424930334011": ROOT_DIR_FILE,
+                        "543528180028451862": FILE_1_IN_PARENT_FOLDER,
+                        "840733669383922639": FILE_2_IN_PARENT_FOLDER,
+                        "557788652057687615": FILE_3_IN_SUB_FOLDER,
+                        "627114226410696732": FILE_4_IN_SUB_FOLDER,
                     }
-                }
+                },
+                "delete_keys": {
+                    "files": {
+                        "844424930334011": ROOT_DIR_FILE,
+                        "543528180028451862": FILE_1_IN_PARENT_FOLDER,
+                        "840733669383922639": FILE_2_IN_PARENT_FOLDER,
+                        "557788652057687615": FILE_3_IN_SUB_FOLDER,
+                        "627114226410696732": FILE_4_IN_SUB_FOLDER,
+                    }
+                },
             },
-            ["844424930334011", "543528180028451862"],
+            ["844424930334011", "543528180028451862", "627114226410696732"],
         )
     ],
 )
 def test_sync_deleted_files(ids, deleted_ids):
     """Test that sync_deleted_files delete files from Enterprise Search."""
-    expected_ids = {"global_keys": {"files": {}}}
+    expected_ids = {
+        "global_keys": {
+            "files": {
+                "840733669383922639": FILE_2_IN_PARENT_FOLDER,
+                "557788652057687615": FILE_3_IN_SUB_FOLDER,
+            }
+        },
+        "delete_keys": {
+            "files": {
+                "844424930334011": ROOT_DIR_FILE,
+                "543528180028451862": FILE_1_IN_PARENT_FOLDER,
+                "840733669383922639": FILE_2_IN_PARENT_FOLDER,
+                "557788652057687615": FILE_3_IN_SUB_FOLDER,
+                "627114226410696732": FILE_4_IN_SUB_FOLDER,
+            }
+        }
+    }
     args = argparse.Namespace()
     args.config_file = CONFIG_FILE
     deletion_sync_obj = DeletionSyncCommand(args)
