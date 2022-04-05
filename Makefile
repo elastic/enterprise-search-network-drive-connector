@@ -30,7 +30,8 @@ help:
 	@echo "make cover - check test coverage for the project"
 	@echo "make lint - run linter against the project"
 	@echo "make clean - remove venv and other temporary files from the project"
-	@echo "make test_connectivity - test connectivity to Sharepoint and Enterprise Search"
+	@echo "make test_connectivity - test connectivity to Network Drives and Enterprise Search"
+	@echo "make update_package - update package with local changes"
 
 .venv_init:
 	${PIP} install virtualenv
@@ -52,7 +53,7 @@ test: .installed .venv_init
 	${VENV_DIRECTORY}/${EXEC_DIR}/${PYTHON_EXE} -m pytest ${TEST_DIRECTORY}/ --suppress-no-test-exit-code
 
 cover: .installed .venv_init
-	${VENV_DIRECTORY}/${EXEC_DIR}/${PYTHON_EXE} -m pytest --cov ${PROJECT_DIRECTORY} --cov-fail-under=${COVERAGE_THRESHOLD} ${TEST_DIRECTORY}/ --suppress-no-test-exit-code
+	${VENV_DIRECTORY}/${EXEC_DIR}/${PYTHON_EXE} -m pytest --cov ${PROJECT_DIRECTORY} --cov-config=${TEST_DIRECTORY}/.coveragerc  --cov-fail-under=${COVERAGE_THRESHOLD} ${TEST_DIRECTORY}/ --suppress-no-test-exit-code
 
 lint: .installed .venv_init
 	${VENV_DIRECTORY}/${EXEC_DIR}/flake8 ${PROJECT_DIRECTORY}

@@ -62,7 +62,6 @@ class BootstrapCommand(BaseCommand):
             content_source_id = resp.get('id')
             logger.info(
                 f"Created ContentSource with ID {content_source_id}. \
-                You may now begin indexing with content-source-id= {content_source_id}"
-            )
+                    You may now begin indexing with content-source-id= {content_source_id}")
         except Exception as exception:
             logger.error(f"Could not create a content source, Error {exception}")
