@@ -58,6 +58,7 @@ class SyncEnterpriseSearch:
                 while len(documents_to_index) < BATCH_SIZE:
                     document = self.queue.get()
                     if document.get("type") == "signal_close":
+                        self.logger.info(f"Found an end signal in the queue. Closing Thread ID {threading.get_ident()}")
                         signal_open = False
                         break
                     else:

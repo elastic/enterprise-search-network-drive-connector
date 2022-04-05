@@ -89,7 +89,7 @@ class FullSyncCommand(BaseCommand):
         }
         logger.info(f"Indexing started at: {current_time}")
 
-        queue = ConnectorQueue()
+        queue = ConnectorQueue(logger)
         self.start_producer(queue, time_range)
         self.start_consumer(queue)
         checkpoint.set_checkpoint(current_time, INDEXING_TYPE, drive)

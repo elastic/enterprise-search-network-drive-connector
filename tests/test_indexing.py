@@ -38,7 +38,7 @@ def create_enterprise_search_obj():
         enterprise_search_host,
         http_auth=configs.get_value("enterprise_search.api_key"),
     )
-    queue = ConnectorQueue()
+    queue = ConnectorQueue(logger)
     queue.end_signal()
     return SyncEnterpriseSearch(configs, logger, workplace_search_client, queue)
 
