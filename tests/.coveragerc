@@ -1,0 +1,2 @@
+[run]
+omit = */ees_network_drive/test_connectivity.py

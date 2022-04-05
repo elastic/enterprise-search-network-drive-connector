@@ -46,7 +46,6 @@ class PermissionSyncCommand(BaseCommand):
         super().__init__(args)
 
         config = self.config
-
         self.logger.info("Initializing the Permission Indexing class")
         self.ws_source = config.get_value("enterprise_search.source_id")
         self.enable_document_permission = config.get_value("enable_document_permission")
