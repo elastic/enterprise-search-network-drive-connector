@@ -586,7 +586,7 @@ retry_count: 3
 
 #### `network_drives_sync_thread_count`
 
-The number of threads the connector will run parallelly for fetching documents from the Network Drive. By default, the connector uses 5 threads.
+The number of threads the connector will run in parallel when fetching documents from the Network Drive. By default, the connector uses 5 threads.
 
 ```yaml
 network_drives_sync_thread_count: 5
