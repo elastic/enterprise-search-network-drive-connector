@@ -69,7 +69,7 @@ Collect the information that is required to connect to your Network Drives:
 - The Network Drives path the connector will crawl to fetch files.
 - The username the connector will use to log in to Network Drives.
 - The password the connector will use to log in to Network Drives.
-- The server ip where Network Drives is hosted.
+- The server IP address where the Network Drive is hosted.
 - The name of the server where the Network Drives is present (note that server name may not be the same as the hostname. On Windows, you can get the machine from the System panel)
 - The client machine name can be a random client name within 15 chars.
 
