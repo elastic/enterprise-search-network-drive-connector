@@ -494,7 +494,7 @@ network_drive.server_ip: '1.2.3.4'
 
 #### `client_machine.name` (required)
 
-The client machine name can be a random client name within 15 chars.
+The client machine name can be a random client name of up to 15 characters.
 
 ```yaml
 client_machine.name: 'Workplace'
