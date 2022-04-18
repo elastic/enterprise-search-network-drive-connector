@@ -66,7 +66,7 @@ The steps above are relevant to all users. Some users may require additional fea
 Collect the information that is required to connect to your Network Drives:
 
 - The domain name where the Network Drive is present.
-- The path in the Network Drives, where the connector will crawl for fetching files.
+- The Network Drives path the connector will crawl to fetch files.
 - The username the connector will use to log in to Network Drives.
 - The password the connector will use to log in to Network Drives.
 - The server ip where Network Drives is hosted.
