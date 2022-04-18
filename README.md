@@ -73,7 +73,7 @@ Collect the information that is required to connect to your Network Drives:
 - The name of the server where the Network Drive is found. (Note that server name may not be the same as the hostname. On Windows, you can get the machine name from the System panel.)
 - The client machine name can be a random client name of up to 15 characters.
 
-ℹ️ The credentials provided for the connector should be for a user that has atleast read permissions for the folder path provided.
+ℹ️ The user credentials provided for the connector must have at least **read** permissions for the folder path provided.
 
 Later, you will [configure the connector](#configure-the-connector) with these values.
 
