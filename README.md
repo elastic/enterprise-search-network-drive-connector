@@ -107,7 +107,7 @@ Each Network Drives connector syncs data from Network Drives into a Workplace Se
 Create a content source within Kibana:
 
 1. Navigate to **Enterprise Search** → **Workplace Search** → **Sources** → **Add Source** → **Custom Content Source**.
-2. Name your Content Source. Eg. Network Drives Connector
+2. Name your Content Source, (e.g. Network Drives Connector).
 3. Choose **Configure Network Drives Connector**.
 
 Record the ID of the new content source. This value is labeled *Source Identifier* within Kibana. Later, you will [configure the connector](#configure-the-connector) with this value.
