@@ -548,7 +548,7 @@ exclude:
 #### `start_time`
 
 A UTC timestamp the connector uses to determine which objects to extract and sync from Network Drives. Determines the *starting* point for a [full sync](#full-sync).
-It supports the following time format YYYY-MM-DDTHH:MM:SSZ
+Supports the following time format `YYYY-MM-DDTHH:MM:SSZ`
 
 ```yaml
 start_time: 2022-04-01T04:44:16Z
