@@ -227,7 +227,7 @@ This example redirects standard output and standard error to files, as explained
 
 Use this example to create your own crontab file. Manually add the file to your crontab using `crontab -e`. Or, if your system supports cron.d, copy or symlink the file into `/etc/cron.d/`.
 
-There may be a possibility that a scheduled job overlaps next scheduled job .
+**Note**: It's possible that scheduled jobs may overlap.
 To avoid multiple crons from running concurrently, you can use `flock` along with cron. The flock command is provided by the util-linux package.  You can install it via `yum install util-linux`. 
 Using flock ensures the next scheduled cron runs only after the current one has completed execution. 
 
