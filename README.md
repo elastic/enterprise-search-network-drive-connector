@@ -28,7 +28,6 @@ Refer to the Elastic subscriptions pages for [Elastic Cloud](https://www.elastic
   - [Schedule recurring syncs](#schedule-recurring-syncs)
 - [Troubleshooting](#troubleshooting)
   - [Troubleshoot extraction](#troubleshoot-extraction)
-  - [Troubleshoot syncing](#troubleshoot-syncing)
 - [Advanced usage](#advanced-usage)
   - [Customize extraction and syncing](#customize-extraction-and-syncing)
   - [Use document-level permissions (DLP)](#use-document-level-permissions-dlp)
@@ -242,10 +241,9 @@ Let's consider an example of running incremental-sync as a cron job with flock:
 
 To troubleshoot an issue, first view your [logged errors and exceptions](#log-errors-and-exceptions).
 
-Use the following sections to help troubleshoot further:
+Use the following section to help troubleshoot further:
 
 - [Troubleshoot extraction](#troubleshoot-extraction)
-- [Troubleshoot syncing](#troubleshoot-syncing)
 
 If you need assistance, use the Elastic community forums or Elastic support:
 
