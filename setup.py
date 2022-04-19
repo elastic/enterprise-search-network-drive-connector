@@ -30,7 +30,7 @@ install_requires = [
 
 description = ""
 
-with open("README.rst", encoding='utf-8') as readme_file:
+with open("README.md", encoding='utf-8') as readme_file:
     description += readme_file.read() + "\n\n"
 
 
