@@ -4,7 +4,7 @@
 
 # Network Drives connector package
 
-Use this _Elastic Enterprise Search Network Drives connector package_ to deploy and run a Network Drive connector on your own infrastructure. The connector extracts and syncs data from Windows Network Drives. The data is indexed into a Workplace Search content source within an Elastic deployment.
+Use this _Elastic Enterprise Search Network Drives connector package_ to deploy and run a Network Drive connector on your own infrastructure. The connector extracts and syncs data from Network Drives. The data is indexed into a Workplace Search content source within an Elastic deployment.
 
 ⚠️ _This connector package is a **beta** feature._
 Beta features are subject to change and are not covered by the support SLA of generally available (GA) features. Elastic plans to promote this feature to GA in a future release.
@@ -227,8 +227,9 @@ This example redirects standard output and standard error to files, as explained
 
 Use this example to create your own crontab file. Manually add the file to your crontab using `crontab -e`. Or, if your system supports cron.d, copy or symlink the file into `/etc/cron.d/`.
 
-**Note**: It's possible that scheduled jobs may overlap.
-To avoid multiple crons from running concurrently, you can use `flock` along with cron. The flock command is provided by the util-linux package.  You can install it via `yum install util-linux`. 
+⚠️ **Note**: It's possible that scheduled jobs may overlap.
+To avoid multiple crons running concurrently, you can use [flock](https://manpages.debian.org/testing/util-linux/flock.1.en.html) with cron to manage locks. The `flock` command is part of the `util-linux` package. You can install it with `yum install util-linux`
+or `sudo apt-get install -y util-linux`.
 Using flock ensures the next scheduled cron runs only after the current one has completed execution. 
 
 Let's consider an example of running incremental-sync as a cron job with flock:
@@ -285,18 +286,18 @@ After you’ve set up your first connection, you may want to further customize t
 
 The connector will support the following rules for filtering files:
 
-* Size: To filter all files with size > x bytes, provide >x in the include/ exclude field.
-* Path Template: To index files in specific subdirectories or files with specific names/types, use glob pattern. 
+* Size: To filter all files of size **>** x bytes, add `>x` to the `include/exclude` field.
+* Path Template: To index files in specific subdirectories or files with specific names/types, use a glob pattern. 
 
 The Path Template can be used for following use cases:
 
 1. Folder: For example `/Engineering/**/*` will filter all the content inside the Engineering folder. 
-1. File Name: To filter the files containing a given string pattern, you can use following as the glob pattern
+1. File Name: To filter files containing a given string pattern, use the following glob pattern:
 
-- `**/<filename>.*` : files with name as `<filename>`.
-- `**/main*.*` : files having substring `main` in the beginning.
+- `**/<filename>.*` : files named `<filename>`.
+- `**/main*.*` : filenames that start with the substring `main`.
         
-1. File Type: To filter files with media type `pdf`, use glob pattern `**/*.pdf` as a filter.
+1. File Type: To filter `pdf` media type files, use the glob pattern `**/*.pdf`.
 
 These can be defined under include/exclude parameters.
 
@@ -321,7 +322,7 @@ Within your configuration, enable document-level permissions using the following
 
 Copy to your server a CSV file that provides the mapping of user identities. The file must follow this format:
 
-- First column: Network Drives SID
+- First column: Network Drive user's/group's SID
 - Second column: Elastic username
 
 Then, configure the location of the CSV file using the following setting: [`network_drives_enterprise_search_user_mapping`](#network_drives_enterprise_search_user_mapping).
@@ -350,7 +351,7 @@ The following reference sections provide technical details:
 
 ### Data extraction and syncing
 
-Each Network Drives connector extracts and syncs the files from Network Drives:
+Each Network Drives connector extracts and syncs files from Network Drives:
 
 It extracts content from various document formats, and it performs optical character recognition (OCR) to extract content from images.
 
@@ -382,9 +383,9 @@ Perform this operation with the [`deletion-sync` command](#deletion-sync-command
 
 #### Permission sync
 
-Syncs to Enterprise Search all files document permissions since the previous permission sync.
+Syncs to Enterprise Search all file document permissions since the previous permission sync.
 
-When [using document-level permissions (DLP)](#use-document-level-permissions-dlp), use this operation to sync all updates to users within Network Drives.
+When [using document-level permissions (DLP)](#use-document-level-permissions-dlp), use this operation to sync all updates to users and groups within Network Drives.
 
 Perform this operation with the [`permission-sync` command](#permission-sync-command).
 
@@ -470,7 +471,7 @@ network_drive.password: 'L,Ct%ddUvNTE5zk;GsDk^2w)(;,!aJ|Ip!?Oi'
 
 #### `network_drive.path` (required)
 
-The path in the Network Drives, where the connector will crawl for fetching files.
+The Network Drives path the connector will crawl to fetch files.
 
 ```yaml
 network_drive.path: 'path1/drives/org1/ws'
@@ -478,7 +479,7 @@ network_drive.path: 'path1/drives/org1/ws'
 
 #### `network_drive.server_name` (required)
 
-The name of the server where the Network Drives is present (note that server name may not be the same as the hostname. On Windows, you can get the machine from the System panel)
+The name of the server where the Network Drive is found. (Note that server name may not be the same as the hostname. On Windows, you can get the machine name from the System panel.)
 
 ```yaml
 network_drive.server_name: 'elastic'
@@ -513,7 +514,7 @@ enterprise_search.api_key: 'zvksftxrudcitxa7ris4328b'
 The ID of the Workplace Search content source. See [Create a Workplace Search content source](#create-a-workplace-search-content-source).
 
 ```yaml
-enterptrise_search.source_id: '12345678909876543ab21012a'
+enterprise_search.source_id: '12345678909876543ab21012a'
 ```
 
 #### `enterprise_search.host_url` (required)
