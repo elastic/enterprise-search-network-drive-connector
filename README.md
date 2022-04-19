@@ -146,7 +146,7 @@ Next, ensure the `ees_network_drive` executable is on your `PATH`. For example, 
 export PATH=/Users/shaybanon/Library/Python/3.8/bin:$PATH
 ```
 
-The following table provides the installation location for each operating system (Considering you are using Python version 3.8):
+The following table provides the installation location for each operating system (note Python version 3.8):
 
 | Operating system | Installation location                                        |
 | ---------------- | ------------------------------------------------------------ |
