@@ -2,9 +2,9 @@
 
 [Elastic Enterprise Search](https://www.elastic.co/guide/en/enterprise-search/current/index.html) | [Elastic Workplace Search](https://www.elastic.co/guide/en/workplace-search/current/index.html)
 
-# Network Drives connector package
+# Network drives connector package
 
-Use this _Elastic Enterprise Search Network Drives connector package_ to deploy and run a Network Drive connector on your own infrastructure. The connector extracts and syncs data from Network Drives. The data is indexed into a Workplace Search content source within an Elastic deployment.
+Use this _Elastic Enterprise Search network drives connector package_ to deploy and run a network drive connector on your own infrastructure. The connector extracts and syncs data from network drives. The data is indexed into a Workplace Search content source within an Elastic deployment.
 
 ⚠️ _This connector package is a **beta** feature._
 Beta features are subject to change and are not covered by the support SLA of generally available (GA) features. Elastic plans to promote this feature to GA in a future release.
@@ -15,7 +15,7 @@ Refer to the Elastic subscriptions pages for [Elastic Cloud](https://www.elastic
 **Table of contents:**
 
 - [Setup and basic usage](#setup-and-basic-usage)
-  - [Gather Network Drives details](#gather-network-drives-details)
+  - [Gather network drives details](#gather-network-drives-details)
   - [Gather Elastic details](#gather-elastic-details)
   - [Create a Workplace Search API key](#create-a-workplace-search-api-key)
   - [Create a Workplace Search content source](#create-a-workplace-search-content-source)
@@ -43,7 +43,7 @@ Refer to the Elastic subscriptions pages for [Elastic Cloud](https://www.elastic
 
 Complete the following steps to deploy and run the connector:
 
-1. [Gather Network Drives details](#gather-network-drives-details)
+1. [Gather network drives details](#gather-network-drives-details)
 1. [Gather Elastic details](#gather-elastic-details)
 1. [Create a Workplace Search API key](#create-a-workplace-search-api-key)
 1. [Create a Workplace Search content source](#create-a-workplace-search-content-source)
@@ -60,16 +60,16 @@ The steps above are relevant to all users. Some users may require additional fea
 - [Customize extraction and syncing](#customize-extraction-and-syncing)
 - [Use document-level permissions (DLP)](#use-document-level-permissions-dlp)
 
-### Gather Network Drives details
+### Gather network drives details
 
-Collect the information that is required to connect to your Network Drives:
+Collect the information that is required to connect to your network drives:
 
-- The domain name where the Network Drive is present.
-- The Network Drives path the connector will crawl to fetch files.
-- The username the connector will use to log in to Network Drives.
-- The password the connector will use to log in to Network Drives.
-- The server IP address where the Network Drive is hosted.
-- The name of the server where the Network Drive is found. (Note that server name may not be the same as the hostname. On Windows, you can get the machine name from the System panel.)
+- The domain name where the network drive is present.
+- The network drives path the connector will crawl to fetch files.
+- The username the connector will use to log in to network drives.
+- The password the connector will use to log in to network drives.
+- The server IP address where the network drive is hosted.
+- The name of the server where the network drive is found. (Note that server name may not be the same as the hostname. On Windows, you can get the machine name from the System panel.)
 - The client machine name can be a random client name of up to 15 characters.
 
 ℹ️ The user credentials provided for the connector must have at least **read** permissions for the folder path provided.
@@ -83,7 +83,7 @@ Some connector features require additional details. Review the following documen
 
 ### Gather Elastic details
 
-First, ensure your Elastic deployment is [compatible](#enterprise-search-compatibility) with the Network Drives connector package.
+First, ensure your Elastic deployment is [compatible](#enterprise-search-compatibility) with the network drives connector package.
 
 Next, determine the [Enterprise Search base URL](https://www.elastic.co/guide/en/enterprise-search/current/endpoints-ref.html#enterprise-search-base-url) for your Elastic deployment.
 
@@ -95,19 +95,19 @@ If you plan to use document-level permissions, you will also need user identity 
 
 ### Create a Workplace Search API key
 
-Each Network Drives connector authorizes its connection to Elastic using a Workplace Search API key.
+Each network drives connector authorizes its connection to Elastic using a Workplace Search API key.
 
 Create an API key within Kibana. See [Workplace Search API keys](https://www.elastic.co/guide/en/workplace-search/current/workplace-search-api-authentication.html#auth-token).
 
 ### Create a Workplace Search content source
 
-Each Network Drives connector syncs data from Network Drives into a Workplace Search content source.
+Each network drives connector syncs data from network drives into a Workplace Search content source.
 
 Create a content source within Kibana:
 
 1. Navigate to **Enterprise Search** → **Workplace Search** → **Sources** → **Add Source** → **Custom Content Source**.
 2. Name your Content Source, (e.g. Network Drives Connector).
-3. Choose **Configure Network Drives Connector**.
+3. Choose **Configure network drives Connector**.
 
 Record the ID of the new content source. This value is labeled *Source Identifier* within Kibana. Later, you will [configure the connector](#configure-the-connector) with this value.
 
@@ -117,7 +117,7 @@ Record the ID of the new content source. This value is labeled *Source Identifie
 
 After you’ve prepared the two services, you are ready to connect them.
 
-Provision a Windows, MacOS, or Linux server for your Network Drives connectors.
+Provision a Windows, MacOS, or Linux server for your network drives connectors.
 
 The infrastructure must provide the necessary runtime dependencies. See [Runtime dependencies](#runtime-dependencies).
 
@@ -170,7 +170,7 @@ Use the additional settings to customize the connection and manage features such
 
 ### Test the connection
 
-After you’ve configured the connector, you can test the connection between Elastic and Network Drives. Use the following `make` target to test the connection:
+After you’ve configured the connector, you can test the connection between Elastic and network drives. Use the following `make` target to test the connection:
 
 ```shell
 make test_connectivity
@@ -178,7 +178,7 @@ make test_connectivity
 
 ### Sync data
 
-After you’ve confirmed the connection between the two services, you are ready to sync data from Network Drives to Elastic.
+After you’ve confirmed the connection between the two services, you are ready to sync data from network drives to Elastic.
 
 The following table lists the available [sync operations](#sync-operations), as well as the [commands](#command-line-interface-cli) to perform the operations.
 
@@ -189,7 +189,7 @@ The following table lists the available [sync operations](#sync-operations), as 
 | [Deletion sync](#deletion-sync)       | [`deletion-sync`](#deletion-sync-command)      |
 | [Permission sync](#permission-sync)   | [`permission-sync`](#permission-sync-command)   |
 
-Begin syncing with an *incremental sync*. This operation begins [extracting and syncing content](#data-extraction-and-syncing) from Network Drives to Elastic. If desired, [customize extraction and syncing](#customize-extraction-and-syncing) for your use case.
+Begin syncing with an *incremental sync*. This operation begins [extracting and syncing content](#data-extraction-and-syncing) from network drives to Elastic. If desired, [customize extraction and syncing](#customize-extraction-and-syncing) for your use case.
 
 Review the additional sync operations to learn about the different types of syncs. Additional configuration is required to use [document-level permissions](#use-document-level-permissions-dlp).
 
@@ -320,14 +320,14 @@ Within your configuration, enable document-level permissions using the following
 
 Copy to your server a CSV file that provides the mapping of user identities. The file must follow this format:
 
-- First column: Network Drive user's/group's SID
+- First column: network drive user's/group's SID
 - Second column: Elastic username
 
 Then, configure the location of the CSV file using the following setting: [`network_drives_enterprise_search_user_mapping`](#network_drives_enterprise_search_user_mapping).
 
 #### Sync document-level permissions data
 
-Sync document-level permissions data from Network Drives to Elastic.
+Sync document-level permissions data from network drives to Elastic.
 
 The following sync operations include permissions data:
 
@@ -349,7 +349,7 @@ The following reference sections provide technical details:
 
 ### Data extraction and syncing
 
-Each Network Drives connector extracts and syncs files from Network Drives:
+Each network drives connector extracts and syncs files from network drives:
 
 It extracts content from various document formats, and it performs optical character recognition (OCR) to extract content from images.
 
@@ -357,7 +357,7 @@ You can customize extraction and syncing per connector. See [Customize extractio
 
 ### Sync operations
 
-The following sections describe the various operations to [sync data](#sync-data) from Network Drives to Elastic.
+The following sections describe the various operations to [sync data](#sync-data) from network drives to Elastic.
 
 #### Incremental sync
 
@@ -383,13 +383,13 @@ Perform this operation with the [`deletion-sync` command](#deletion-sync-command
 
 Syncs to Enterprise Search all file document permissions since the previous permission sync.
 
-When [using document-level permissions (DLP)](#use-document-level-permissions-dlp), use this operation to sync all updates to users and groups within Network Drives.
+When [using document-level permissions (DLP)](#use-document-level-permissions-dlp), use this operation to sync all updates to users and groups within network drives.
 
 Perform this operation with the [`permission-sync` command](#permission-sync-command).
 
 ### Command line interface (CLI)
 
-Each Network Drives connector has the following command line interface (CLI):
+Each network drives connector has the following command line interface (CLI):
 
 ```shell
 ees_network_drive [-c <pathname>] <command>
@@ -445,7 +445,7 @@ Performs a [permission sync](#permission-sync) operation.
 
 #### `network_drive.domain` (required)
 
-The domain name where your Network Drives is present.
+The domain name where your network drives is present.
 
 ```yaml
 network_drive.domain: "Domain3"
@@ -453,7 +453,7 @@ network_drive.domain: "Domain3"
 
 #### `network_drive.username` (required)
 
-The username of the account for Network Drives. See [Gather Network Drives details](#gather-network-drives-details).
+The username of the account for network drives. See [Gather network drives details](#gather-network-drives-details).
 
 ```yaml
 network_drive.username: bill.gates
@@ -461,7 +461,7 @@ network_drive.username: bill.gates
 
 #### `network_drive.password` (required)
 
-The password of the account to be used for crawling the Network Drives. See [Gather Network Drives details](#gather-network-drives-details).
+The password of the account to be used for crawling the network drives. See [Gather network drives details](#gather-network-drives-details).
 
 ```yaml
 network_drive.password: 'L,Ct%ddUvNTE5zk;GsDk^2w)(;,!aJ|Ip!?Oi'
@@ -469,7 +469,7 @@ network_drive.password: 'L,Ct%ddUvNTE5zk;GsDk^2w)(;,!aJ|Ip!?Oi'
 
 #### `network_drive.path` (required)
 
-The Network Drives path the connector will crawl to fetch files.
+The network drives path the connector will crawl to fetch files.
 
 ```yaml
 network_drive.path: 'path1/drives/org1/ws'
@@ -477,7 +477,7 @@ network_drive.path: 'path1/drives/org1/ws'
 
 #### `network_drive.server_name` (required)
 
-The name of the server where the Network Drive is found. (Note that server name may not be the same as the hostname. On Windows, you can get the machine name from the System panel.)
+The name of the server where the network drive is found. (Note that server name may not be the same as the hostname. On Windows, you can get the machine name from the System panel.)
 
 ```yaml
 network_drive.server_name: 'elastic'
@@ -485,7 +485,7 @@ network_drive.server_name: 'elastic'
 
 #### `network_drive.server_ip` (required)
 
-The server ip where Network Drives is hosted.
+The server ip where network drives is hosted.
 
 ```yaml
 network_drive.server_ip: '1.2.3.4'
@@ -525,7 +525,7 @@ enterprise_search.host_url: https://my-deployment.ent.europe-west1.gcp.cloud.es.
 
 #### `enable_document_permission`
 
-Whether the connector should sync [document-level permissions (DLP)](#use-document-level-permissions-dlp) from Network Drives.
+Whether the connector should sync [document-level permissions (DLP)](#use-document-level-permissions-dlp) from network drives.
 
 ```yaml
 enable_document_permission: Yes
@@ -533,7 +533,7 @@ enable_document_permission: Yes
 
 #### `include/exclude`
 
-Specifies which files should be indexed based on their size or path template in Network Drives.
+Specifies which files should be indexed based on their size or path template in network drives.
 
 ```yaml
 include:
@@ -546,7 +546,7 @@ exclude:
 
 #### `start_time`
 
-A UTC timestamp the connector uses to determine which objects to extract and sync from Network Drives. Determines the *starting* point for a [full sync](#full-sync).
+A UTC timestamp the connector uses to determine which objects to extract and sync from network drives. Determines the *starting* point for a [full sync](#full-sync).
 Supports the following time format `YYYY-MM-DDTHH:MM:SSZ`
 
 ```yaml
@@ -555,7 +555,7 @@ start_time: 2022-04-01T04:44:16Z
 
 #### `end_time`
 
-A UTC timestamp the connector uses to determine which objects to extract and sync from Network Drives. Determines the *stopping* point for a [full sync](#full-sync).
+A UTC timestamp the connector uses to determine which objects to extract and sync from network drives. Determines the *stopping* point for a [full sync](#full-sync).
 It supports the following time format YYYY-MM-DDTHH:MM:SSZ
 
 ```yaml
@@ -585,7 +585,7 @@ retry_count: 3
 
 #### `network_drives_sync_thread_count`
 
-The number of threads the connector will run in parallel when fetching documents from the Network Drive. By default, the connector uses 5 threads.
+The number of threads the connector will run in parallel when fetching documents from the network drive. By default, the connector uses 5 threads.
 
 ```yaml
 network_drives_sync_thread_count: 5
@@ -611,14 +611,14 @@ network_drives_enterprise_search_user_mapping: 'C:/Users/banon/connector/identit
 
 #### Enterprise Search compatibility
 
-The Network Drives connector package is compatible with Elastic deployments that meet the following criteria:
+The network drives connector package is compatible with Elastic deployments that meet the following criteria:
 
 - Elastic Enterprise Search version greater than or equal to 7.13.0 and less than 8.0.0.
 - An Elastic subscription that supports this feature. Refer to the Elastic subscriptions pages for [Elastic Cloud](https://www.elastic.co/subscriptions/cloud) and [self-managed](https://www.elastic.co/subscriptions) deployments.
 
 #### Runtime dependencies
 
-Each Network Drives connector requires a runtime environment that satisfies the following dependencies:
+Each network drives connector requires a runtime environment that satisfies the following dependencies:
 
 - Windows, MacOS, or Linux server. The connector has been tested with CentOS 7, MacOS Monterey v12.0.1, and Windows 10.
 - Python version 3.6 or later.
