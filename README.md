@@ -619,7 +619,7 @@ network_drives_enterprise_search_user_mapping: 'C:/Users/banon/connector/identit
 
 The network drives connector package is compatible with Elastic deployments that meet the following criteria:
 
-- Elastic Enterprise Search version greater than or equal to 7.13.0 and less than 8.0.0.
+- Elastic Enterprise Search version greater than or equal to 7.13.0.
 - An Elastic subscription that supports this feature. Refer to the Elastic subscriptions pages for [Elastic Cloud](https://www.elastic.co/subscriptions/cloud) and [self-managed](https://www.elastic.co/subscriptions) deployments.
 
 #### Runtime dependencies
