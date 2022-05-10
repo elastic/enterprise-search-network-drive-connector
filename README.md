@@ -132,6 +132,11 @@ make install_package
 ```
 
 This command runs as the current user and installs the connector and its dependencies.
+Note: By Default, the package installed supports Enterprise Search version 8.0 or above. In order to use the connector for older versions of Enterprise Search(less than version 8.0) use the ES_VERSION_V8 argument while running make install_package or make install_locally command:
+
+```shell
+make install_package ES_VERSION_V8=no
+```
 
 ℹ️ Within a Windows environment, first install `make`:
 
@@ -518,9 +523,10 @@ enterprise_search.source_id: '12345678909876543ab21012a'
 #### `enterprise_search.host_url` (required)
 
 The [Enterprise Search base URL](https://www.elastic.co/guide/en/enterprise-search/current/endpoints-ref.html#enterprise-search-base-url) for your Elastic deployment.
+Note: To use Enterprise Search version 8 or above, port is required.
 
 ```yaml
-enterprise_search.host_url: https://my-deployment.ent.europe-west1.gcp.cloud.es.io
+enterprise_search.host_url: https://my-deployment.ent.europe-west1.gcp.cloud.es.io:9243
 ```
 
 #### `enable_document_permission`
