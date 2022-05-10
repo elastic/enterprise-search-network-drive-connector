@@ -33,7 +33,6 @@ class FullSyncCommand(BaseCommand):
             logger,
             self.config,
             time_range,
-            self.workplace_search_client,
             self.network_drive_client,
             self.indexing_rules,
             queue,
@@ -71,7 +70,7 @@ class FullSyncCommand(BaseCommand):
         """
         logger = self.logger
         thread_count = self.config.get_value("enterprise_search_sync_thread_count")
-        sync_es = SyncEnterpriseSearch(self.config, logger, self.workplace_search_client, queue)
+        sync_es = SyncEnterpriseSearch(self.config, logger, self.workplace_search_custom_client, queue)
 
         self.create_jobs(thread_count, sync_es.perform_sync, (), None)
 

@@ -24,44 +24,27 @@ class BootstrapCommand(BaseCommand):
         It will use data from configuration file to determine
         which instance of Elastic Enterprise Search will be used
         to create a Content Source."""
-
-        logger = self.logger
-        args = self.args
-        workplace_search = self.workplace_search_client
-        try:
-            resp = workplace_search.create_content_source(
-                body={
-                    "name": args.name,
-                    "schema": {
-                        "title": "text",
-                        "body": "text",
-                        "url": "text",
-                        "created_at": "date",
-                        "name": "text",
-                        "description": "text",
-                        "type": "text",
-                        "size": "text"
-                    },
-                    "display": {
-                        "title_field": "title",
-                        "description_field": "description",
-                        "url_field": "url",
-                        "detail_fields": [
-                            {"field_name": 'created_at', "label": 'Created At'},
-                            {"field_name": 'type', "label": 'Type'},
-                            {"field_name": 'size', "label": 'Size (in bytes)'},
-                            {"field_name": 'description', "label": 'Description'},
-                            {"field_name": 'body', "label": 'Content'}
-                        ],
-                        "color": "#000000"
-                    },
-                    "is_searchable": True
-                }
-            )
-
-            content_source_id = resp.get('id')
-            logger.info(
-                f"Created ContentSource with ID {content_source_id}. \
-                    You may now begin indexing with content-source-id= {content_source_id}")
-        except Exception as exception:
-            logger.error(f"Could not create a content source, Error {exception}")
+        schema = {
+            "title": "text",
+            "body": "text",
+            "url": "text",
+            "created_at": "date",
+            "name": "text",
+            "description": "text",
+            "type": "text",
+            "size": "text",
+        }
+        display = {
+            "title_field": "title",
+            "description_field": "description",
+            "url_field": "url",
+            "detail_fields": [
+                {"field_name": 'created_at', "label": 'Created At'},
+                {"field_name": 'type', "label": 'Type'},
+                {"field_name": 'size', "label": 'Size (in bytes)'},
+                {"field_name": 'description', "label": 'Description'},
+                {"field_name": 'body', "label": 'Content'},
+            ],
+            "color": "#000000",
+        }
+        self.workplace_search_custom_client.create_content_source(schema, display, self.args.name, True)

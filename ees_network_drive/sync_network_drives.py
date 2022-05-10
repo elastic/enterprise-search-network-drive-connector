@@ -22,7 +22,6 @@ class SyncNetworkDrives:
         logger,
         config,
         time_range,
-        workplace_search_client,
         network_drive_client,
         indexing_rules,
         queue,
@@ -31,7 +30,6 @@ class SyncNetworkDrives:
         self.config = config
         self.time_range = time_range
         self.drive_path = Path(self.config.get_value("network_drive.path"))
-        self.workplace_search_client = workplace_search_client
         self.network_drive_client = network_drive_client
         self.indexing_rules = indexing_rules
         self.network_drives_sync_thread_count = config.get_value("network_drives_sync_thread_count")

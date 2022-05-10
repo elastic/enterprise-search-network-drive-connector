@@ -17,9 +17,8 @@ except ImportError:
 
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
-from elastic_enterprise_search import WorkplaceSearch
-
 from .configuration import Configuration
+from .enterprise_search_wrapper import EnterpriseSearchWrapper
 from .indexing_rule import IndexingRules
 from .local_storage import LocalStorage
 from .network_drive_client import NetworkDrive
@@ -47,7 +46,7 @@ class BaseCommand:
         """
         log_level = self.config.get_value('log_level')
         logger = logging.getLogger(__name__)
-        logger.propagate = False
+        logger.propagate = True
         logger.setLevel(log_level)
 
         handler = logging.StreamHandler()
@@ -60,23 +59,10 @@ class BaseCommand:
         return logger
 
     @cached_property
-    def workplace_search_client(self):
-        """Get the workplace search client instance for the running command.
-        Host and api key are taken from configuration file, if
-        a user was provided when running command, then basic auth
-        will be used instead.
+    def workplace_search_custom_client(self):
+        """Get the workplace search custom client instance for the running command.
         """
-        args = self.args
-        host = self.config.get_value("enterprise_search.host_url")
-
-        if hasattr(args, 'user') and args.user:
-            return WorkplaceSearch(
-                f"{host}/api/ws/v1/sources", http_auth=(args.user, args.password)
-            )
-        else:
-            return WorkplaceSearch(
-                f"{host}/api/ws/v1/sources", http_auth=self.config.get_value("enterprise_search.api_key")
-            )
+        return EnterpriseSearchWrapper(self.logger, self.config, self.args)
 
     @cached_property
     def config(self):

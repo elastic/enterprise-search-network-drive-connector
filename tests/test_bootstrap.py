@@ -33,9 +33,8 @@ def test_execute(caplog):
     caplog.set_level("INFO")
     mock_response = {"id": "1234"}
     bootstrap_obj = BootstrapCommand(args)
-    bootstrap_obj.config._Configuration__configurations[
-        "enterprise_search.host_url"
-    ] = "dummy"
-    bootstrap_obj.workplace_search_client.create_content_source = Mock(return_value=mock_response)
+    bootstrap_obj.workplace_search_custom_client.workplace_search_client.create_content_source = Mock(
+        return_value=mock_response
+    )
     bootstrap_obj.execute()
-    assert "Created ContentSource with ID 1234. You may now begin indexing with content-source-id= 1234"
+    assert "Created ContentSource with ID 1234." in caplog.text
