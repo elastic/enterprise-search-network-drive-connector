@@ -80,16 +80,10 @@ class DeletionSyncCommand(BaseCommand):
             ids: updated structure containing ids of all files after performing deletion
         """
         if ids_list:
-            try:
-                for chunk in split_documents_into_equal_chunks(ids_list, constant.BATCH_SIZE):
-                    self.workplace_search_client.delete_documents(
-                        content_source_id=self.config.get_value("enterprise_search.source_id"),
-                        document_ids=chunk,
-                    )
-                for id in ids_list:
-                    ids["global_keys"]["files"].pop(id)
-            except Exception as exception:
-                self.logger.exception(f"Error while checking for deleted files. Error: {exception}")
+            for chunk in split_documents_into_equal_chunks(ids_list, constant.BATCH_SIZE):
+                self.workplace_search_custom_client.delete_documents(chunk)
+            for id in ids_list:
+                ids["global_keys"]["files"].pop(id)
         return ids
 
     def execute(self):

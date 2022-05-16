@@ -21,7 +21,7 @@ enterprise_search.api_key: "dummy_key"
 #Source identifier for the custom source created on the workplace search server
 enterprise_search.source_id: "abc123"
 #Workplace search server address Example: http://es-host:3002 
-enterprise_search.host_url: "https://dummy_host/"
+enterprise_search.host_url: "https://dummy_host:3002/"
 # ------------------------------- Connector specific configuration settings -------------------------------
 #Specifies the objects to be fetched and indexed in the WorkPlace search along with fields that needs to be included/excluded. The list of the objects with a pattern to be included/excluded is provided. By default all the objects are fetched
 include:
@@ -45,4 +45,4 @@ enterprise_search_sync_thread_count: 5
 #Denotes whether document permission will be enabled or not
 enable_document_permission: Yes
 #The path of csv file containing mapping of Network Drive user ID to Workplace user ID
-network_drive_enterprise_search.user_mapping: "user_mapping.csv"
+network_drive_enterprise_search.user_mapping: "user_mapping.csv" 

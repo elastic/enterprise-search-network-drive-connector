@@ -51,17 +51,11 @@ def create_network_drive_obj():
         "end_time": "2022-03-25T15:14:28Z",
     }
     network_drive_client = NetworkDrive(configs, logger)
-    enterprise_search_host = configs.get_value("enterprise_search.host_url")
-    workplace_search_client = WorkplaceSearch(
-        enterprise_search_host,
-        http_auth=configs.get_value("enterprise_search.api_key"),
-    )
     queue = ConnectorQueue()
     return SyncNetworkDrives(
         logger,
         configs,
         time_range,
-        workplace_search_client,
         network_drive_client,
         queue,
     )
@@ -97,7 +91,7 @@ def test_index_document(documents, mock_response, caplog):
     """Test that index_document successfully index documents in Enterprise Search."""
     caplog.set_level("INFO")
     indexer_obj = create_enterprise_search_obj()
-    indexer_obj.workplace_search_client.index_documents = Mock(return_value=mock_response)
+    indexer_obj.workplace_search_custom_client.index_documents = Mock(return_value=mock_response)
     indexer_obj.index_documents(documents)
     assert indexer_obj.total_document_indexed == 2
 
@@ -126,7 +120,7 @@ def test_index_document_when_error_occurs(documents, mock_response, log_level, e
     """Test that index_document give proper error message if document not indexed."""
     caplog.set_level(log_level)
     indexer_obj = create_enterprise_search_obj()
-    indexer_obj.workplace_search_client.index_documents = Mock(return_value=mock_response)
+    indexer_obj.workplace_search_custom_client.index_documents = Mock(return_value=mock_response)
     indexer_obj.index_documents(documents)
     assert error_msg in caplog.text
 

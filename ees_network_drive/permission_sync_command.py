@@ -55,46 +55,14 @@ class PermissionSyncCommand(BaseCommand):
         """ Removes all the permissions present in the workplace
         """
         try:
-            user_permission = self.workplace_search_client.list_permissions(
-                content_source_id=self.ws_source,
-            )
-
+            user_permission = self.workplace_search_custom_client.list_permissions()
             if user_permission:
                 self.logger.info("Removing the permissions from the workplace...")
                 permission_list = user_permission['results']
                 for permission in permission_list:
-                    self.workplace_search_client.remove_user_permissions(
-                        content_source_id=self.ws_source,
-                        user=permission['user'],
-                        body={
-                            "permissions": permission['permissions']
-                        }
-                    )
-                self.logger.info("Successfully removed the permissions from the workplace.")
+                    self.workplace_search_custom_client.remove_permissions(permission)
         except Exception as exception:
             self.logger.exception(f"Error while removing the permissions from the workplace. Error: {exception}")
-
-    def workplace_add_permission(self, user_name, permissions):
-        """This method when invoked would index the permission provided in the paramater
-            for the user in parameter user_name
-            :param permissions: list of permissions
-            :param user_name: user to assign permissions
-        """
-        try:
-            self.workplace_search_client.add_user_permissions(
-                content_source_id=self.ws_source,
-                user=user_name,
-                body={
-                    "permissions": permissions
-                },
-            )
-            self.logger.info(
-                f"Successfully indexed the permissions for user {user_name} to the workplace"
-            )
-        except Exception as exception:
-            self.logger.exception(
-                f"Error while indexing the permissions for user: {user_name} to the workplace. Error: {exception}"
-            )
 
     def execute(self):
         """ Runs the permission indexing logic.
@@ -123,7 +91,7 @@ class PermissionSyncCommand(BaseCommand):
                         {self.user_mapping}. Error: {e}")
             self.remove_all_permissions()
             for key, val in mappings.items():
-                self.workplace_add_permission(key, val)
+                self.workplace_search_custom_client.add_permissions(key, val)
         else:
             self.logger.error(f'Could not find the users mapping file at the location: {self.user_mapping} or the file is empty. \
                 Please add the sid->user mappings to sync the permissions in the Enterprise Search')

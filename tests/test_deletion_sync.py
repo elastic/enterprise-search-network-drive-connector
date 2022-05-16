@@ -127,6 +127,6 @@ def test_sync_deleted_files(ids, deleted_ids):
     args = argparse.Namespace()
     args.config_file = CONFIG_FILE
     deletion_sync_obj = DeletionSyncCommand(args)
-    deletion_sync_obj.workplace_search_client.delete_documents = Mock(return_value=True)
+    deletion_sync_obj.workplace_search_custom_client.delete_documents = Mock(return_value=True)
     result = deletion_sync_obj.sync_deleted_files(deleted_ids, ids)
     assert result == expected_ids
