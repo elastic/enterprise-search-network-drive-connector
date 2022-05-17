@@ -541,12 +541,14 @@ enable_document_permission: Yes
 
 Specifies which files should be indexed based on their size or path template in network drives.
 
+Note: By default, the connector includes files listed in the include field and excludes files listed in the exclude field.
+
 ```yaml
 include:
    size:
-   path_template:
+   path_template: ["**/*.txt", "**/*.contact", "**/*.docx", "**/*.json", "**/*.png", "**/*.jpg", "**/*.jpeg", "**/*.py", "**/*.yml", "**/*.md", "**/*.ini", "**/*.sh", "**/*.rst", "**/*.pdf", "**/*.rtf", "**/*.ppt", "**/*.file"]
 exclude:
-   size:
+   size: [">10000000"]
    path_template:
 ```
 
