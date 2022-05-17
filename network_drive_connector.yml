@@ -26,9 +26,9 @@ enterprise_search.host_url: "http://localhost:3002/"
 #Specifies the objects to be fetched and indexed in the WorkPlace search along with fields that needs to be included/excluded. The list of the objects with a pattern to be included/excluded is provided. By default all the objects are fetched
 include:
    size:
-   path_template:
+   path_template: ["**/*.txt", "**/*.contact", "**/*.docx", "**/*.json", "**/*.png", "**/*.jpg", "**/*.jpeg", "**/*.py", "**/*.yml", "**/*.md", "**/*.ini", "**/*.sh", "**/*.rst", "**/*.pdf", "**/*.rtf", "**/*.ppt", "**/*.file"]
 exclude:
-  size:
+  size: [">10000000"]
   path_template:
 #The timestamp after which all the objects that are modified or created are fetched from the Network Drive. By default, all the objects present in the Network Drive till the end_time are fetched
 start_time : 
