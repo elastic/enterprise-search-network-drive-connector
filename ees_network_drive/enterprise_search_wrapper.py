@@ -5,6 +5,7 @@
 #
 """This module perform operations related to Enterprise Search based on the Enterprise Search version
 """
+import elastic_transport
 from elastic_enterprise_search import WorkplaceSearch, __version__
 from packaging import version
 
@@ -48,7 +49,8 @@ class EnterpriseSearchWrapper:
         """
         try:
             if self.version >= ENTERPRISE_V8:
-                from elastic_enterprise_search.exceptions import ConflictError
+                from elastic_enterprise_search.exceptions import (
+                    BadRequestError, ConflictError)
 
                 external_user_properties = [
                     {
@@ -73,15 +75,23 @@ class EnterpriseSearchWrapper:
                         external_user_properties=external_user_properties,
                         permissions=permission_list,
                     )
+                except BadRequestError:
+                    raise ValueError("Incompatible version")
             else:
-                self.workplace_search_client.add_user_permissions(
-                    content_source_id=self.ws_source,
-                    user=user_name,
-                    body={"permissions": permission_list},
-                )
+                try:
+                    self.workplace_search_client.add_user_permissions(
+                        content_source_id=self.ws_source,
+                        user=user_name,
+                        body={"permissions": permission_list},
+                    )
+                except elastic_transport.exceptions.NotFoundError:
+                    raise ValueError("Incompatible version")
             self.logger.info(
                 f"Successfully indexed the permissions for user {user_name} to the workplace"
             )
+        except ValueError as error:
+            raise ValueError(f"Please compare the Enterprise Search version used while running the installation \
+                                to the version of Enterprise Search installed. Error: {error}")
         except Exception as exception:
             self.logger.exception(
                 f"Error while indexing the permissions for user: {user_name} to the workplace. Error: {exception}"
@@ -96,12 +106,18 @@ class EnterpriseSearchWrapper:
                     content_source_id=self.ws_source
                 )
             else:
-                user_permission = self.workplace_search_client.list_permissions(
-                    content_source_id=self.ws_source,
-                )
+                try:
+                    user_permission = self.workplace_search_client.list_permissions(
+                        content_source_id=self.ws_source,
+                    )
+                except elastic_transport.exceptions.NotFoundError:
+                    raise ValueError("Incompatible version")
             self.logger.info(
                 "Successfully retrieves all permissions from the workplace"
             )
+        except ValueError as error:
+            raise ValueError(f"Please compare the Enterprise Search version used while running the installation \
+                                to the version of Enterprise Search installed. Error: {error}")
         except Exception as exception:
             self.logger.exception(
                 f"Error while retrieving the permissions from the workplace. Error: {exception}"
@@ -114,18 +130,27 @@ class EnterpriseSearchWrapper:
         """
         try:
             if self.version >= ENTERPRISE_V8:
-                user_name = permission["external_user_properties"][0]["attribute_value"]
-                self.workplace_search_client.delete_external_identity(
-                    content_source_id=self.ws_source, external_user_id=user_name
-                )
+                if permission.get("external_user_properties"):
+                    user_name = permission["external_user_properties"][0]["attribute_value"]
+                    self.workplace_search_client.delete_external_identity(
+                        content_source_id=self.ws_source, external_user_id=user_name
+                    )
+                else:
+                    raise ValueError("Incompatible version")
             else:
-                user_name = permission["user"]
-                self.workplace_search_client.remove_user_permissions(
-                    content_source_id=self.ws_source,
-                    user=user_name,
-                    body={"permissions": permission["permissions"]},
-                )
+                try:
+                    user_name = permission["user"]
+                    self.workplace_search_client.remove_user_permissions(
+                        content_source_id=self.ws_source,
+                        user=user_name,
+                        body={"permissions": permission["permissions"]},
+                    )
+                except elastic_transport.exceptions.NotFoundError:
+                    raise ValueError("Incompatible version")
             self.logger.info("Successfully removed the permissions from the workplace.")
+        except ValueError as error:
+            raise ValueError(f"Please compare the Enterprise Search version used while running the installation \
+                                to the version of Enterprise Search installed. Error: {error}")
         except Exception as exception:
             self.logger.exception(
                 f"Error while removing the permissions from the workplace. Error: {exception}"
