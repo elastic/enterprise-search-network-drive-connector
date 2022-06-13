@@ -105,9 +105,10 @@ Each network drives connector syncs data from network drives into a Workplace Se
 
 Create a content source within Kibana:
 
-1. Navigate to **Enterprise Search** → **Workplace Search** → **Sources** → **Add Source** → **Custom Content Source**.
+1. Navigate to **Enterprise Search** → **Workplace Search** → **Sources** → **Add an organization content source** → **Custom API Source**.
 2. Name your Content Source, (e.g. Network Drives Connector).
-3. Choose **Configure network drives Connector**.
+
+For more details please refer [Elastic Documentation for creating a custom content source](https://www.elastic.co/guide/en/workplace-search/current/workplace-search-custom-api-sources.html#create-custom-source).
 
 Record the ID of the new content source. This value is labeled *Source Identifier* within Kibana. Later, you will [configure the connector](#configure-the-connector) with this value.
 
@@ -533,6 +534,8 @@ enterprise_search.host_url: https://my-deployment.ent.europe-west1.gcp.cloud.es.
 
 Whether the connector should sync [document-level permissions (DLP)](#use-document-level-permissions-dlp) from network drives.
 
+By default, it is set to `Yes` i.e. by default, the connector will try to sync document-level permissions.
+
 ```yaml
 enable_document_permission: Yes
 ```
@@ -561,6 +564,8 @@ Supports the following time format `YYYY-MM-DDTHH:MM:SSZ`
 start_time: 2022-04-01T04:44:16Z
 ```
 
+By default, it is set to unix epoch time `1970-01-01T00:00:00Z`
+
 #### `end_time`
 
 A UTC timestamp the connector uses to determine which objects to extract and sync from network drives. Determines the *stopping* point for a [full sync](#full-sync).
@@ -569,6 +574,8 @@ It supports the following time format YYYY-MM-DDTHH:MM:SSZ
 ```yaml
 end_time: 2022-04-01T04:44:16Z
 ```
+
+By default, it is set to current execution time.
 
 #### `log_level`
 
@@ -583,6 +590,8 @@ The level or severity that determines the threshold for [logging](#log-errors-an
 log_level: INFO
 ```
 
+By default, it is set to `INFO`.
+
 #### `retry_count`
 
 The number of retries to perform when there is a server error. The connector applies an exponential backoff algorithm to retries.
@@ -590,6 +599,8 @@ The number of retries to perform when there is a server error. The connector app
 ```yaml
 retry_count: 3
 ```
+
+By default, it is set to `3`.
 
 #### `network_drives_sync_thread_count`
 
