@@ -38,6 +38,7 @@ Refer to the Elastic subscriptions pages for [Elastic Cloud](https://www.elastic
   - [Configuration settings](#configuration-settings)
   - [Enterprise Search compatibility](#enterprise-search-compatibility)
   - [Runtime dependencies](#runtime-dependencies)
+- [Connector Limitations](#connector-limitations)
 
 ## Setup and basic usage
 
@@ -632,3 +633,7 @@ Each network drives connector requires a runtime environment that satisfies the 
 - Python version 3.6 or later.
 - To extract content from images: Java version 7 or later, and [`tesseract` command](https://github.com/tesseract-ocr/tesseract) installed and added to `PATH`
 - To schedule recurring syncs: a job scheduler, such as `cron`
+
+## Connector Limitations
+
+:information_source: Currently, the connector will only work for Windows and Linux shared SMB folders.
