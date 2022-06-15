@@ -534,7 +534,7 @@ enterprise_search.host_url: https://my-deployment.ent.europe-west1.gcp.cloud.es.
 
 Whether the connector should sync [document-level permissions (DLP)](#use-document-level-permissions-dlp) from network drives.
 
-By default, it is set to `Yes` i.e. by default, the connector will try to sync document-level permissions.
+By default, it is set to `Yes` i.e. the connector will try to sync document-level permissions.
 
 ```yaml
 enable_document_permission: Yes
