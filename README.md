@@ -108,7 +108,7 @@ Create a content source within Kibana:
 1. Navigate to **Enterprise Search** → **Workplace Search** → **Sources** → **Add an organization content source** → **Custom API Source**.
 2. Name your Content Source, (e.g. Network Drives Connector).
 
-For more details please refer [Elastic Documentation for creating a custom content source](https://www.elastic.co/guide/en/workplace-search/current/workplace-search-custom-api-sources.html#create-custom-source).
+For more details see [Elastic Documentation for creating a custom content source](https://www.elastic.co/guide/en/workplace-search/current/workplace-search-custom-api-sources.html#create-custom-source).
 
 Record the ID of the new content source. This value is labeled *Source Identifier* within Kibana. Later, you will [configure the connector](#configure-the-connector) with this value.
 
