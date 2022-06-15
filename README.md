@@ -65,9 +65,7 @@ The steps above are relevant to all users. Some users may require additional fea
 Collect the information that is required to connect to your network drives:
 
 - The domain name where the network drive is present.
-- The network drives path the connector will crawl to fetch files. It should be the name of the folder shared via SMB followed by the path relative to that shared folder
-
-  (For Example: If `Users` is the name of SMB shared folder and folder to be fetched is `folder1`, then the path would be mentioned as `Users/folder1`)
+- The network drives path the connector will crawl to fetch files. This is the name of the folder shared via SMB, followed by the path relative to that shared folder. For example: if the name of the of SMB shared folder is `Users` and the folder to be fetched is `folder1`, then the path is `Users/folder1`.
 - The username the connector will use to log in to network drives.
 - The password the connector will use to log in to network drives.
 - The server IP address where the network drive is hosted.
