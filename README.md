@@ -636,4 +636,4 @@ Each network drives connector requires a runtime environment that satisfies the 
 
 ## Connector Limitations
 
-Currently, the connector will only work for Windows and Linux shared SMB folders.
+:information_source: Currently, the connector will only work for Windows and Linux shared SMB folders.
