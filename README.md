@@ -76,7 +76,7 @@ Collect the information that is required to connect to your network drives:
 
 Later, you will [configure the connector](#configure-the-connector) with these values.
 
-ℹ️ The connector uses [pysmb](https://pysmb.readthedocs.io/en/latest/) module for connecting to your Network Drives. pysmb supports SMB1 and SMB2.
+ℹ️ The connector uses the [pysmb](https://pysmb.readthedocs.io/en/latest/) module to connect to your Network Drives. `pysmb` supports SMB1 and SMB2.
 
 Some connector features require additional details. Review the following documentation if you plan to use these features:
 
