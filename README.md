@@ -2,9 +2,16 @@
 
 [Elastic Enterprise Search](https://www.elastic.co/guide/en/enterprise-search/current/index.html) | [Elastic Workplace Search](https://www.elastic.co/guide/en/workplace-search/current/index.html)
 
-# Network drives connector package
+___
+**For new users, we recommend using our Elasticsearch native tools, rather than the standalone Workplace Search product. See [this blog post](https://www.elastic.co/blog/evolution-workplace-search-private-data-elasticsearch) for more information about upgrading your internal knowledge search, to make it an amazing experience for your users!**
 
-Use this _Elastic Enterprise Search network drives connector package_ to deploy and run a network drive connector on your own infrastructure. The connector extracts and syncs data from network drives. The data is indexed into a Workplace Search content source within an Elastic deployment.
+We recommend using the new [Elastic Network Drive connector ](https://www.elastic.co/guide/en/enterprise-search/current/connectors-network-drive.html) to ingest your content from your network drive in regular Elasticsearch indices.
+___
+
+
+# Workplace Search: Network drives connector package
+
+Use this _Elastic Enterprise Search network drives connector package_ to deploy and run a network drive connector on your own infrastructure. The connector package extracts and syncs data from network drives. The data is indexed into a Workplace Search content source within an Elastic deployment.
 
 ⚠️ _This connector package is a **beta** feature._
 Beta features are subject to change and are not covered by the support SLA of generally available (GA) features. Elastic plans to promote this feature to GA in a future release.
