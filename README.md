@@ -15,7 +15,7 @@ ___
 Use this _Elastic Enterprise Search network drives connector package_ to deploy and run a network drive connector on your own infrastructure. The connector package extracts and syncs data from network drives. The data is indexed into a Workplace Search content source within an Elastic deployment.
 
 ⚠️ _This connector package is a **beta** feature._
-Beta features are subject to change and are not covered by the support SLA of generally available (GA) features. Elastic plans to promote this feature to GA in a future release.
+Beta features are subject to change and are not covered by the support SLA of generally available (GA) features.
 
 ℹ️ _This connector package requires a compatible Elastic subscription level._
 Refer to the Elastic subscriptions pages for [Elastic Cloud](https://www.elastic.co/subscriptions/cloud) and [self-managed](https://www.elastic.co/subscriptions) deployments.
